@@ -1,0 +1,71 @@
+{
+  "name": "multiplatform-idle-clicker-boilerplate",
+  "version": "1.0.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JacksonJohnny/multiplatform-idle-clicker-boilerplate.git"
+  },
+  "homepage": "https://github.com/JacksonJohnny/multiplatform-idle-clicker-boilerplate",
+  "bugs": {
+    "url": "https://github.com/JacksonJohnny/multiplatform-idle-clicker-boilerplate/issues"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "cap:add:android": "cap add android",
+    "cap:add:ios": "cap add ios",
+    "cap:doctor": "cap doctor",
+    "cap:sync": "cap sync",
+    "cap:sync:android": "cap sync android",
+    "cap:sync:ios": "cap sync ios",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios",
+    "mobile:android": "npm run build && npm run cap:sync:android",
+    "mobile:ios": "npm run build && npm run cap:sync:ios",
+    "android": "npm run mobile:android && npm run cap:open:android",
+    "ios": "npm run mobile:ios && npm run cap:open:ios",
+    "lint": "eslint src",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "keywords": [
+    "clicker",
+    "idle-game",
+    "phaser",
+    "tauri",
+    "capacitor",
+    "desktop",
+    "mobile",
+    "steam"
+  ],
+  "description": "Generic English multiplatform idle clicker boilerplate: Phaser + Vite, Tauri 2 (desktop), Capacitor 8 (Android/iOS).",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
+    "decimal.js": "^10.6.0",
+    "phaser": "^4.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.2",
+    "@eslint/js": "^9.39.5",
+    "@tauri-apps/cli": "^2.11.4",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^20.11.0",
+    "prettier": "^3.9.6",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  }
+}

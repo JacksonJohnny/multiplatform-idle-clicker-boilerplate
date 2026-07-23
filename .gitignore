@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.env
+android/.gradle/
+android/.idea/
+android/local.properties
+.DS_Store
+*.log
+_tmp_*
