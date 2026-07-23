@@ -3,7 +3,6 @@ import {
   AUTO_TAP_CURSOR_TINTS,
   getAutoTapCursorMultiplier,
   getAutoTapCursorTint,
-  getAutoTapWaveMultiplierSum,
   getMaxAutoTapCursorSlots,
 } from '../lib/autoTapProgress.js';
 
@@ -28,11 +27,5 @@ describe('autoTapProgress color tiers', () => {
     expect(getAutoTapCursorTint(slots * 2, slots - 1, slots)).toBe(AUTO_TAP_CURSOR_TINTS[1]);
     expect(getAutoTapCursorTint(slots * 2 + 1, 0, slots)).toBe(AUTO_TAP_CURSOR_TINTS[2]);
     expect(getAutoTapCursorMultiplier(slots * 2 + 1, 0, slots)).toBe(3);
-  });
-
-  it('sums white-click equivalents for a wave', () => {
-    expect(getAutoTapWaveMultiplierSum(2, slots)).toBe(2);
-    // 63 white + 1 blue in a 64-click wave cycling 63 cursors: 62*1 + 2 + 2 = 66
-    expect(getAutoTapWaveMultiplierSum(slots + 1, slots)).toBe(slots + 3);
   });
 });

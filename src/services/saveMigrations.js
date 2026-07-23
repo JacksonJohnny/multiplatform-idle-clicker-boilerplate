@@ -2,12 +2,7 @@ import { SAVE_VERSION } from '../config/gameConfig.js';
 import { cloneSave, compensateLegacyMilestoneStars, normalizeSaveState } from '../lib/saveState.js';
 
 // Re-export pure save helpers so storage/tests keep a single import path for migrations.
-export {
-  BOOST_ID_ALIASES,
-  UPGRADE_ID_ALIASES,
-  compensateLegacyMilestoneStars,
-  normalizeSaveState,
-} from '../lib/saveState.js';
+export { compensateLegacyMilestoneStars, normalizeSaveState } from '../lib/saveState.js';
 
 const MIGRATIONS = [
   {

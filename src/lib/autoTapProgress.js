@@ -59,23 +59,3 @@ export function getAutoTapCursorTint(level, index, maxSlots = getMaxAutoTapCurso
 export function getAutoTapCursorMultiplier(level, index, maxSlots = getMaxAutoTapCursorSlots()) {
   return getAutoTapCursorTier(level, index, maxSlots) + 1;
 }
-
-/**
- * One Auto Tap wave performs `level` clicks cycling the visible cursors.
- * Returns how many white-click equivalents that wave is worth.
- */
-export function getAutoTapWaveMultiplierSum(level, maxSlots = getMaxAutoTapCursorSlots()) {
-  const safeLevel = Math.max(0, level | 0);
-  const count = Math.min(safeLevel, Math.max(1, maxSlots | 0));
-
-  if (safeLevel <= 0) {
-    return 0;
-  }
-
-  let sum = 0;
-  for (let i = 0; i < safeLevel; i += 1) {
-    sum += getAutoTapCursorMultiplier(safeLevel, i % count, maxSlots);
-  }
-
-  return sum;
-}
