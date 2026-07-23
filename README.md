@@ -1,0 +1,1 @@
+# multiplatform-idle-clicker-boilerplate
