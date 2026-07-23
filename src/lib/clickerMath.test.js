@@ -5,10 +5,12 @@ import {
   calculateUpgradeCost,
   formatCoins,
   formatIdleSharePercent,
+  getAutoTapWaveWhiteEquivalents,
   getGeneratorEfficiencyStarCount,
   getGeneratorIdleShare,
   isUpgradeUnlocked,
 } from './clickerMath.js';
+import { getMaxAutoTapCursorSlots } from './autoTapProgress.js';
 
 describe('clickerMath', () => {
   it('formats small, suffixed and very large values', () => {
@@ -86,5 +88,12 @@ describe('clickerMath', () => {
     const stats = calculateStats(state);
     expect(stats.perSecond.toString()).toBe('10');
     expect(stats.perClick.toString()).toBe('2');
+  });
+
+  it('sums white-click equivalents for an Auto Tap wave', () => {
+    const slots = getMaxAutoTapCursorSlots();
+    expect(getAutoTapWaveWhiteEquivalents(2).toString()).toBe('2');
+    // 63 white + 1 blue in a 64-click wave cycling 63 cursors: 62*1 + 2 + 2 = 66
+    expect(getAutoTapWaveWhiteEquivalents(slots + 1).toString()).toBe(String(slots + 3));
   });
 });

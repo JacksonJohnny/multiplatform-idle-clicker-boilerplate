@@ -16,7 +16,6 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
@@ -50,9 +49,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@capacitor/android": "^8.4.2",
-    "@capacitor/core": "^8.4.2",
-    "@capacitor/ios": "^8.4.2",
     "decimal.js": "^10.6.0",
     "phaser": "^4.2.1"
   },
@@ -60,7 +56,6 @@
     "@capacitor/cli": "^8.4.2",
     "@eslint/js": "^9.39.5",
     "@tauri-apps/cli": "^2.11.4",
-    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "happy-dom": "^20.11.0",

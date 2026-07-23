@@ -67,7 +67,6 @@ Validation:
 ```bash
 npm test
 npm run build
-npm run test:coverage
 ```
 
 | Script | Purpose |
@@ -132,6 +131,8 @@ npm run tauri:build   # artifacts under src-tauri/target/release/bundle/
 Steam Partner checklist (no Steamworks SDK in this base): create an App + Win/Mac/Linux depots, upload via SteamPipe. Steamworks (achievements / cloud) = phase 2.
 
 ## Android / iOS
+
+Capacitor packages (`@capacitor/core`, platform) are installed when you add a platform — they are not pre-bundled.
 
 ```bash
 # first time

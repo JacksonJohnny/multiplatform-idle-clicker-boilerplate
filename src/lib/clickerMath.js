@@ -155,7 +155,7 @@ export function calculateBulkUpgradeCost(upgrade, amount) {
 }
 
 /** How many levels can be bought with current coins for this upgrade. */
-export function getMaxAffordableUpgradeAmount(state, upgrade) {
+function getMaxAffordableUpgradeAmount(state, upgrade) {
   if (!upgrade || !isUpgradeUnlocked(upgrade, state.upgrades)) {
     return 0;
   }
