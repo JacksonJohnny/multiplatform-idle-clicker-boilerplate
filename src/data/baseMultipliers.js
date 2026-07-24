@@ -1,10 +1,6 @@
 import Decimal from 'decimal.js';
 import tiers from './baseMultiplierTiers.json';
 
-/**
- * Genre-agnostic base production multipliers (lifetime-coin unlocks).
- * Effect stacks multiplicatively with global meta-upgrades.
- */
 export function buildBaseMultipliers() {
   return tiers.map((tier, index) => ({
     id: `base-multiplier-${index + 1}`,

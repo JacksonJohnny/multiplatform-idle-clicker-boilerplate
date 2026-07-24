@@ -1,7 +1,6 @@
 import { COLORS, FONT_FAMILIES } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 
-/** Purple square currency glyph + optional label text. */
 export function createAscensionTokenBadge(scene, x, y, options = {}) {
   const size = options.size ?? 14;
   const showLabel = options.showLabel !== false;

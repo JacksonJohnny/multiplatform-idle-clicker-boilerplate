@@ -8,7 +8,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 
 ## Structure
 
-- `src/config` — resolution (`1280×720` landscape), theme, UI text, buy amounts, `SAVE_KEY` / `SAVE_VERSION`
+- `src/config` — dual layout (`1280×720` desktop / `540×960` mobile via `platform.js`), theme, UI text, buy amounts, `SAVE_KEY` / `SAVE_VERSION`
 - `src/controllers` — `ListScrollController` (drag + mouse wheel)
 - `src/data` — generators, click upgrades, `metaUpgrades.js`, `achievements.js`
 - `src/lib` — formulas + session + Auto Tap + prestige + save shape
@@ -29,7 +29,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 
 1. Theme + title: `theme.js`, `uiText.js` (keep English unless you intentionally localize)
 2. Generators / upgrades / meta / prestige / achievements: `src/data/`, `src/lib/`
-3. Resolution / loops: `gameConfig.js` (keep landscape if you share one layout)
+3. Resolution / loops: `gameConfig.js` + `platform.js` (desktop landscape, mobile portrait)
 4. Desktop id/window: `src-tauri/tauri.conf.json` (replace `com.example.idleclicker.desktop`)
 5. Mobile `appId`: `capacitor.config.json` (replace `com.example.idleclicker`)
 6. `npm test` && `npm run build`
@@ -50,7 +50,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 | Android | `npm run android` (after `cap:add:android`) |
 | iOS | `npm run ios` (macOS; after `cap:add:ios`) |
 
-Lock native apps to **landscape** so they match `1280×720`.
+Lock native apps to **portrait** so they match `540×960`. Desktop / Steam stay landscape.
 
 Steam: package with Tauri, upload depots. Steamworks later if needed.
 

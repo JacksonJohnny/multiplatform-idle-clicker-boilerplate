@@ -12,7 +12,6 @@ import { buildUpgradeListView } from '../../ui/upgradeListView.js';
 import { setupListViewportCameras } from './viewportCameras.js';
 import { PAGE } from './pageNavigation.js';
 
-/** Shared panel metrics for full-height list pages under the section title. */
 function createFullHeightListLayout(
   scene,
   { panelTop = UI_LAYOUT.panelTop, rowHeight, rowGap = 0, panelPadding = 12 } = {},
@@ -50,7 +49,7 @@ export function createStorePage(scene) {
   const rowHeight = Math.max(compactRows ? 72 : 84, 72);
   const rowGap = compactRows ? 12 : 16;
   const panelPadding = 12;
-  const panelTop = UI_LAYOUT.panelTop + 20;
+  const panelTop = UI_LAYOUT.storePanelTop;
   const panelBottomMargin = scene.navHeight + 14;
   const maxPanelHeight = height - panelTop - panelBottomMargin;
   const listHeight = scene.state.upgrades.length * rowHeight + (scene.state.upgrades.length - 1) * rowGap;
@@ -85,7 +84,6 @@ export function createStorePage(scene) {
     })
     .setOrigin(0, 0.5);
 
-  // Center buy modes in the gap between STORE title and the list panel.
   const titleBottom = scene.storeTitle.y + scene.storeTitle.height / 2;
   const buyBarY = (titleBottom + panelTopY) / 2;
 
@@ -194,7 +192,6 @@ export function createSettingsChrome(scene) {
   });
 }
 
-/** List cameras + scroll controllers for STORE / UPGRADE / STATUS. */
 export function setupListInteraction(scene) {
   setupListViewportCameras(scene, [
     { key: 'upgradeCamera', content: scene.upgradeContent, layout: scene.upgradeLayout },

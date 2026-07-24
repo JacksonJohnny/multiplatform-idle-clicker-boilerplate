@@ -6,7 +6,7 @@ All player-facing copy, docs, and placeholder brand names are **English and gene
 
 Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/JacksonJohnny/multiplatform-idle-clicker-boilerplate)
 
-Base resolution: `1280×720` (landscape on every platform — one shared layout).  
+Base resolution: desktop `1280×720` landscape (resizes to the window); mobile `540×960` portrait. Detection is automatic (`?ui=mobile|desktop` to force).
 Placeholder ids: Tauri `com.example.idleclicker.desktop` · Capacitor `com.example.idleclicker`.
 
 Short fork/rebrand guide: [`BOILERPLATE.md`](BOILERPLATE.md).
@@ -90,7 +90,7 @@ capacitor.config.json  Capacitor (mobile; android/ios folders after cap add)
 
 ```js
 // src/config/gameConfig.js
-GAME_CONFIG = { width: 1280, height: 720, backgroundColor: '#111822' }
+GAME_CONFIG = desktop 1280×720 (RESIZE) · mobile 540×960 (FIT) — picked via isMobileUi()
 LOOP_CONFIG = {
   autoSaveDelayMs: 10000,
   maxOfflineSeconds: null, // null = no offline earnings cap
@@ -102,7 +102,7 @@ SAVE_VERSION = 10
 Optional env (`.env.example`): `VITE_SAVE_KEY`.  
 Desktop identifier: `src-tauri/tauri.conf.json`. Mobile `appId`: `capacitor.config.json`.
 
-Lock native Android/iOS apps to **landscape** (matches `1280×720`).
+Lock native Android/iOS apps to **portrait** (matches `540×960`). Desktop / Steam stay landscape.
 
 ## Save and migrations
 

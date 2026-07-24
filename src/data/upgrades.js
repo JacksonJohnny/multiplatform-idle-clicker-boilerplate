@@ -11,5 +11,4 @@ export const CLICK_UPGRADES = [
   },
 ];
 
-/** Seconds between each auto-tap wave. Each Auto Tap level adds 1 click per wave. */
 export const AUTO_TAP_INTERVAL_SECONDS = 10;

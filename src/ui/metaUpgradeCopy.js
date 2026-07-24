@@ -1,7 +1,6 @@
 import { formatCoins } from '../lib/clickerMath.js';
 import { UI_TEXT } from '../config/uiText.js';
 
-/** Player-facing copy for meta-upgrades (kept out of the economy module). */
 export function getMetaUpgradeConditionText(meta) {
   if (meta.kind === 'generator') {
     return UI_TEXT.metaOwnGenerator

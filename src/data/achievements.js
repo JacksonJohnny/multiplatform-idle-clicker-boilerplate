@@ -1,5 +1,3 @@
-/** Milestone achievements → permanent idle production bonuses (milk-like, no lore). */
-
 function hasEarnedAtLeast(totalCoinsEarned, threshold) {
   if (totalCoinsEarned?.gte) {
     return Boolean(totalCoinsEarned.gte(threshold));

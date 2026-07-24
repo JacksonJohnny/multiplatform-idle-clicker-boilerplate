@@ -3,7 +3,6 @@ import { BUY_AMOUNT_OPTIONS, buyAmountLabel } from '../config/buyAmounts.js';
 
 const MIN_HIT = 44;
 
-/** Row of ×1 / ×10 / ×25 / MAX selectors for the STORE page. */
 export function buildBuyAmountBar({ scene, y, selected, onSelect }) {
   const width = scene.scale.width;
   const padding = 28;

@@ -38,21 +38,22 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
     })
     .setOrigin(0, 0);
 
+  const buttonY = scene.navTop - 48;
   const hint = scene.add
-    .text(28, 560, UI_TEXT.prestigeHint, {
+    .text(28, buttonY - 72, UI_TEXT.prestigeHint, {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '15px',
       color: COLORS.mutedText,
       wordWrap: { width: width - 56 },
     })
-    .setOrigin(0, 0);
+    .setOrigin(0, 1);
 
   const button = scene.add
-    .rectangle(width / 2, 720, width - 80, 64, COLORS.primary)
+    .rectangle(width / 2, buttonY, width - 80, 64, COLORS.primary)
     .setStrokeStyle(2, COLORS.primaryBorder)
     .setInteractive({ useHandCursor: true });
   const buttonText = scene.add
-    .text(width / 2, 720, UI_TEXT.prestigeAction, {
+    .text(width / 2, buttonY, UI_TEXT.prestigeAction, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '22px',
       color: COLORS.primaryText,

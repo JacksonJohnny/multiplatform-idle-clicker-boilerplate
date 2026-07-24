@@ -85,9 +85,7 @@ function readRawFromKeys() {
       if (unpacked) {
         return { ...unpacked, sourceKey: key };
       }
-    } catch (_error) {
-      // Try next key.
-    }
+    } catch (_error) {}
   }
 
   return null;

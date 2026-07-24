@@ -75,7 +75,7 @@ export class ClickerScene extends Phaser.Scene {
     this.activePage = PAGE.TAP;
     this.navHeight = getNavHeight();
     this.navTop = height - this.navHeight;
-    this.tapCenterY = UI_LAYOUT.tapCenterY;
+    this.tapCenterY = UI_LAYOUT.tapCenterY ?? Math.round(height * (UI_LAYOUT.tapCenterYRatio ?? 0.5));
     this.gamePage = this.add.container(0, 0);
     this.settingsPage = this.add.container(0, 0);
 
@@ -154,7 +154,11 @@ export class ClickerScene extends Phaser.Scene {
         duration: 120,
         ease: 'Back.Out',
       });
-      this.feedback.spawnFloatingText(`+${formatCoins(gain)}`, COLORS.whiteText, this.tapCenterY);
+      this.feedback.spawnFloatingText(
+        `+${formatCoins(gain)}`,
+        COLORS.whiteText,
+        this.tapCenterY - (UI_LAYOUT.floatTextOffset ?? 0),
+      );
       this.renderState();
     });
 
@@ -386,10 +390,8 @@ export class ClickerScene extends Phaser.Scene {
     const onTapPage = this.gameStarted && this.activePage === PAGE.TAP;
     this.autoTapCursors.layer.setVisible(onTapPage);
 
-    // Tick / auto-tap waves first (may sync cursor count for playClicks).
     this.applyWallClockProgress();
 
-    // Always reposition last so orbit layout matches the final cursor count.
     const cursorCount = onTapPage ? getAutoTapCursorCount(this.state) : 0;
     this.autoTapCursors.updateOrbit(cursorCount, this.time.now);
   }

@@ -15,22 +15,6 @@ import {
   toDecimal,
 } from './clickerMath.js';
 
-/**
- * Mutable clicker session: hydrate, buy, tick, prestige.
- * Formulas stay in `clickerMath.js`.
- */
-
-/**
- * @typedef {object} SaveSnapshot
- * @property {string|number} coins
- * @property {string|number} [totalCoinsEarned]
- * @property {number} totalClicks
- * @property {number} [autoTapProgress]
- * @property {{ id: string, level: number }[]} [upgrades]
- * @property {{ id: string, purchased: boolean }[]} [boosts]
- * @property {number|string} [savedAt]
- */
-
 function cloneUpgrades(upgrades) {
   return upgrades.map((upgrade) => ({ ...upgrade, level: 0 }));
 }
@@ -80,9 +64,7 @@ function syncAchievements(state) {
         unlocked.add(achievement.id);
         changed = true;
       }
-    } catch {
-      // Ignore bad checks against partial state.
-    }
+    } catch {}
   });
 
   state.unlockedAchievements = [...unlocked];

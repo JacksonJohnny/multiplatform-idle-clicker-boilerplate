@@ -1,5 +1,5 @@
 import { LOOP_CONFIG } from '../../config/gameConfig.js';
-import { COLORS } from '../../config/theme.js';
+import { COLORS, UI_LAYOUT } from '../../config/theme.js';
 import { formatCoins, getAutoTapCursorCount } from '../../lib/clickerMath.js';
 import { getAutoTapCursorMultiplier } from '../../lib/autoTapProgress.js';
 import { showOfflineReturn } from './overlays.js';
@@ -31,7 +31,7 @@ export function applyWallClockProgress(scene, options = {}) {
   if (autoTaps > 0 && scene.activePage === PAGE.TAP) {
     const autoTapLevel = getAutoTapCursorCount(scene.state);
     const visibleCursors = Math.min(autoTapLevel, scene.autoTapCursors.maxSlots);
-    // Ensure cursors exist for the wave; ClickerScene.updateOrbit repositions after this.
+
     scene.autoTapCursors.sync(visibleCursors);
     scene.autoTapCursors.playClicks(autoTaps, (cursorIndex, tapIndex) => {
       scene.tapButtonVisuals.forEach((object) => object.setScale(0.94));
@@ -44,7 +44,12 @@ export function applyWallClockProgress(scene, options = {}) {
       const multiplier = getAutoTapCursorMultiplier(autoTapLevel, cursorIndex);
       const tapGain = scene.state.perClick.times(multiplier);
       const xOffset = ((tapIndex % 5) - 2) * 18;
-      scene.feedback.spawnFloatingText(`+${formatCoins(tapGain)}`, COLORS.whiteText, scene.tapCenterY, xOffset);
+      scene.feedback.spawnFloatingText(
+        `+${formatCoins(tapGain)}`,
+        COLORS.whiteText,
+        scene.tapCenterY - (UI_LAYOUT.floatTextOffset ?? 0),
+        xOffset,
+      );
     });
   }
 

@@ -10,7 +10,7 @@ function defaultSyncItem(item, y, layout) {
   }
   item.info.y = y + rowHeight * 0.22;
   item.stars?.forEach((star) => {
-    star.y = y - rowHeight * 0.22; // efficiency pips (not Ascension Tokens)
+    star.y = y - rowHeight * 0.22;
   });
   item.buyButton.y = y;
   item.buyText.y = y;
@@ -34,7 +34,7 @@ export class ListScrollController {
     this.startX = 0;
     this.startY = 0;
     this.axisLock = null;
-    /** Survives until next pointerdown so page-swipe can read it on pointerup. */
+
     this.lastGestureAxis = null;
   }
 
@@ -42,7 +42,6 @@ export class ListScrollController {
     const { scene, layout } = this;
     const trackX = scene.scale.width - 16;
 
-    // Visual-only scrollbar — scroll happens by dragging the list, not the thumb.
     this.track = scene.add
       .rectangle(trackX, (layout.panelTopY + layout.panelBottomY) / 2, 8, layout.visibleListHeight, 0x0b2233, 0.9)
       .setStrokeStyle(1, 0x2f5f7c, 0.9)
@@ -84,7 +83,7 @@ export class ListScrollController {
         if (dx < AXIS_LOCK_PX && dy < AXIS_LOCK_PX) {
           return;
         }
-        // Prefer horizontal when close — lets STORE → TAP swipe win over list scroll.
+
         this.axisLock = dx >= dy ? 'horizontal' : 'vertical';
         this.lastGestureAxis = this.axisLock;
         this.lastPointerY = pointer.y;

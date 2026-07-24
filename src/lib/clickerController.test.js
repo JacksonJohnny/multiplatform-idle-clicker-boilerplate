@@ -47,7 +47,7 @@ describe('clickerController', () => {
     const result = controller.tryBuyUpgrade('upgrade-1');
 
     expect(result.ok).toBe(true);
-    // Own 10 G1 unlocks Starter Pack (+1% idle)
+
     expect(controller.state.perSecond.toString()).toBe('10.1');
   });
 
@@ -61,7 +61,7 @@ describe('clickerController', () => {
 
     expect(controller.state.upgrades.find((item) => item.id === 'upgrade-1')?.level).toBe(50);
     expect(controller.state.boosts.find((item) => item.id === 'upgrade-1-efficiency-1')?.purchased).toBe(true);
-    // Ownership alone must not auto-grant later efficiency tiers on hydrate.
+
     expect(controller.state.boosts.find((item) => item.id === 'upgrade-1-efficiency-2')?.purchased).toBe(false);
     expect(controller.state.boosts.find((item) => item.id === 'upgrade-1-efficiency-3')?.purchased).toBe(false);
   });
@@ -76,7 +76,7 @@ describe('clickerController', () => {
     expect(controller.state.perSecond.toString()).toBe('5');
     expect(getGeneratorEfficiencyStarCount(controller.state, 'upgrade-1')).toBe(0);
     expect(controller.tryBuyMetaUpgrade('upgrade-1-efficiency-1')).toMatchObject({ ok: true });
-    // ×2 efficiency +1% achievement (Tuned Up)
+
     expect(controller.state.perSecond.toString()).toBe('10.1');
     expect(getGeneratorEfficiencyStarCount(controller.state, 'upgrade-1')).toBe(1);
   });
@@ -94,7 +94,7 @@ describe('clickerController', () => {
     });
 
     expect(controller.tryBuyMetaUpgrade('global-production-1')).toMatchObject({ ok: true });
-    // 25×4 efficiency ×1.05 global ×1.04 achievements = 109.2
+
     expect(controller.state.perSecond.toString()).toBe('109.2');
 
     expect(controller.tryBuyMetaUpgrade('click-per-second-tap-1')).toMatchObject({ ok: true });
@@ -178,7 +178,6 @@ describe('clickerController', () => {
     expect(controller.tryBuyUpgrade('upgrade-1', 10)).toMatchObject({ ok: true, amount: 10 });
     expect(controller.state.upgrades.find((item) => item.id === 'upgrade-1')?.level).toBe(10);
 
-    // Unnormalized string inputs should still resolve via normalizeBuyAmount.
     controller.hydrate({
       coins: '100000',
       upgrades: [{ id: 'upgrade-1', level: 0 }],

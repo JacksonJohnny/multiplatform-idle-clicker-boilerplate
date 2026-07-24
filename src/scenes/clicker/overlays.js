@@ -19,7 +19,6 @@ function formatOfflineDuration(totalSeconds) {
   return `${seconds}s`;
 }
 
-/** List cameras composite over the main camera — hide them while a modal is up. */
 function hideListCamerasForModal(scene) {
   scene.upgradeCamera?.setVisible(false);
   scene.metaCamera?.setVisible(false);
@@ -144,7 +143,6 @@ export function destroyStartOverlay(scene) {
   scene.startOverlayHitArea = null;
 }
 
-/** Generic confirm modal (prestige, destructive actions). */
 function showConfirmDialog(
   scene,
   { title, body, confirmLabel, cancelLabel, onConfirm, onCancel, danger = false, confirmDelaySeconds = 0 },
