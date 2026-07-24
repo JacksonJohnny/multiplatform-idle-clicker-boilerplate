@@ -2,18 +2,16 @@ import Phaser from 'phaser';
 import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 
-function createToggle(scene, label, description, settingKey, y, onToggle) {
-  const width = scene.scale.width;
+function createToggle(scene, { centerX, rowWidth, textX, toggleX, y }, label, description, settingKey, onToggle) {
   const background = scene.add
-    .rectangle(width / 2, y, width - 48, 78, COLORS.panel, 0.96)
+    .rectangle(centerX, y, rowWidth, 78, COLORS.panel, 0.96)
     .setStrokeStyle(2, COLORS.panelBorder);
   const labelText = scene.add
-    .text(44, y - 14, label, { fontFamily: FONT_FAMILIES.display, fontSize: '19px', color: COLORS.text })
+    .text(textX, y - 14, label, { fontFamily: FONT_FAMILIES.display, fontSize: '19px', color: COLORS.text })
     .setOrigin(0, 0.5);
   const descriptionText = scene.add
-    .text(44, y + 18, description, { fontFamily: FONT_FAMILIES.body, fontSize: '16px', color: COLORS.mutedText })
+    .text(textX, y + 18, description, { fontFamily: FONT_FAMILIES.body, fontSize: '16px', color: COLORS.mutedText })
     .setOrigin(0, 0.5);
-  const toggleX = width - 84;
   const toggle = scene.add.rectangle(toggleX, y, 92, 46, COLORS.success).setStrokeStyle(2, COLORS.successBorder);
   const valueText = scene.add
     .text(toggleX, y, '', { fontFamily: FONT_FAMILIES.display, fontSize: '16px', color: COLORS.successText })
@@ -23,21 +21,31 @@ function createToggle(scene, label, description, settingKey, y, onToggle) {
   return { settingKey, background, label: labelText, description: descriptionText, toggle, valueText, hitArea };
 }
 
-export function buildSettingsView({ scene, container, onToggle }) {
+function toggleBox(layout) {
+  const toggleWidth = 92;
+  return {
+    centerX: layout.listLeft + layout.listWidth / 2,
+    rowWidth: layout.listWidth - 2,
+    textX: layout.listLeft + 14,
+    toggleX: layout.listLeft + layout.listWidth - toggleWidth / 2 - 10,
+    y: layout.listTop + layout.rowHeight / 2,
+  };
+}
+
+export function buildSettingsView({ scene, container, layout, onToggle }) {
   const title = scene.add
-    .text(28, UI_LAYOUT.sectionTitleY, UI_TEXT.settingsTitle, {
+    .text(layout.titleX, UI_LAYOUT.sectionTitleY, UI_TEXT.settingsTitle, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '24px',
       color: COLORS.accentText,
     })
-    .setOrigin(0, 0.5);
-  const items = [createToggle(scene, UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', 340, onToggle)];
-  const objects = [title];
-  items.forEach((item) =>
-    objects.push(item.background, item.label, item.description, item.toggle, item.valueText, item.hitArea),
+    .setOrigin(0, 0.5)
+    .setVisible(false);
+  const items = [createToggle(scene, toggleBox(layout), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle)];
+  container.add(
+    items.flatMap((item) => [item.background, item.label, item.description, item.toggle, item.valueText, item.hitArea]),
   );
-  container.add(objects);
-  return items;
+  return { title, items };
 }
 
 function parseColor(color) {

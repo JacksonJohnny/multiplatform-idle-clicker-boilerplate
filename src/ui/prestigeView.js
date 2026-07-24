@@ -4,23 +4,25 @@ import { IS_MOBILE_UI } from '../config/gameConfig.js';
 import { formatCoins } from '../lib/clickerMath.js';
 import { createAscensionTokenBadge } from './ascensionTokenBadge.js';
 
-export function buildPrestigeView({ scene, container, onRequestPrestige }) {
+export function buildPrestigeView({ scene, container, layout, onRequestPrestige }) {
   const cols = scene.uiColumns;
   const bandLeft = IS_MOBILE_UI ? 0 : cols.middleLeft;
   const bandWidth = IS_MOBILE_UI ? cols.leftWidth : cols.middleWidth || cols.leftWidth;
-  const originX = bandLeft + 28;
-  const contentWidth = bandWidth - 56;
-  const centerX = bandLeft + bandWidth / 2;
+  const originX = layout?.listLeft ?? bandLeft + 28;
+  const contentWidth = layout?.listWidth ?? bandWidth - 56;
+  const centerX = originX + contentWidth / 2;
+  const tokenY = (layout?.listTop ?? (IS_MOBILE_UI ? 310 : 120)) + 16;
+  const summaryY = tokenY + 50;
   const title = scene.add
-    .text(originX, UI_LAYOUT.sectionTitleY, UI_TEXT.prestigeTitle, {
+    .text(layout?.titleX ?? originX, UI_LAYOUT.sectionTitleY, UI_TEXT.prestigeTitle, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '24px',
       color: COLORS.accentText,
     })
     .setOrigin(0, 0.5)
-    .setVisible(IS_MOBILE_UI);
+    .setVisible(false);
 
-  const tokenBadge = createAscensionTokenBadge(scene, originX, IS_MOBILE_UI ? 310 : 120, {
+  const tokenBadge = createAscensionTokenBadge(scene, originX, tokenY, {
     size: 16,
     fontSize: '20px',
     fontFamily: FONT_FAMILIES.display,
@@ -28,7 +30,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
   });
 
   const tokenCount = scene.add
-    .text(tokenBadge.endX + 10, IS_MOBILE_UI ? 310 : 120, '', {
+    .text(tokenBadge.endX + 10, tokenY, '', {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '20px',
       color: COLORS.text,
@@ -37,7 +39,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
     .setOrigin(0, 0.5);
 
   const summary = scene.add
-    .text(originX, IS_MOBILE_UI ? 360 : 170, '', {
+    .text(originX, summaryY, '', {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '18px',
       color: COLORS.text,
@@ -56,7 +58,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
     .setOrigin(0, 1);
 
   const button = scene.add
-    .rectangle(centerX, buttonY, bandWidth - 80, 64, COLORS.primary)
+    .rectangle(centerX, buttonY, contentWidth, 64, COLORS.primary)
     .setStrokeStyle(2, COLORS.primaryBorder)
     .setInteractive({ useHandCursor: true });
   const buttonText = scene.add
@@ -69,7 +71,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
 
   button.on('pointerup', () => onRequestPrestige());
 
-  container.add([title, ...tokenBadge.nodes, tokenCount, summary, hint, button, buttonText]);
+  container.add([...tokenBadge.nodes, tokenCount, summary, hint, button, buttonText]);
 
   return {
     title,

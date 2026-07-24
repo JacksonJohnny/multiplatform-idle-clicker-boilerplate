@@ -15,14 +15,14 @@ const DESKTOP_PAGES = [PAGE.UPGRADE, PAGE.STATUS, PAGE.PRESTIGE];
 export const SETTINGS_PAGE = PAGE.SETTINGS;
 
 export function isTapSurfaceActive(scene) {
-  if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE) {
+  if (!scene.gameStarted) {
     return false;
   }
   return IS_MOBILE_UI ? scene.activePage === PAGE.TAP : true;
 }
 
 export function isStoreInteractive(scene) {
-  if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE) {
+  if (!scene.gameStarted) {
     return false;
   }
   return IS_MOBILE_UI ? scene.activePage === PAGE.STORE : true;
@@ -120,8 +120,8 @@ export function setActivePage(scene, index) {
   const showMeta = scene.activePage === PAGE.UPGRADE;
   const showStatus = scene.activePage === PAGE.STATUS;
   const showPrestige = scene.activePage === PAGE.PRESTIGE;
-  const showStore = IS_MOBILE_UI ? scene.activePage === PAGE.STORE : !showSettings;
-  const showGame = IS_MOBILE_UI ? scene.activePage === PAGE.TAP : !showSettings;
+  const showStore = IS_MOBILE_UI ? scene.activePage === PAGE.STORE : true;
+  const showGame = IS_MOBILE_UI ? scene.activePage === PAGE.TAP : true;
 
   scene.gamePage.setVisible(showGame);
   scene.storeTitle.setVisible(showStore);
@@ -143,7 +143,9 @@ export function setActivePage(scene, index) {
   scene.statusView?.title?.setVisible(showStatus && IS_MOBILE_UI);
   scene.prestigePage?.setVisible(showPrestige);
   scene.prestigeView?.title?.setVisible(showPrestige && IS_MOBILE_UI);
+  scene.settingsPanelBg?.setVisible(showSettings);
   scene.settingsPage.setVisible(showSettings);
+  scene.settingsTitle?.setVisible(showSettings && IS_MOBILE_UI);
 
   if (showMeta) {
     scene.updateMetaListLayout();
