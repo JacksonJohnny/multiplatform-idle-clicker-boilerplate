@@ -3,7 +3,7 @@ import { COLORS, UI_LAYOUT } from '../../config/theme.js';
 import { formatCoins, getAutoTapCursorCount } from '../../lib/clickerMath.js';
 import { getAutoTapCursorMultiplier } from '../../lib/autoTapProgress.js';
 import { showOfflineReturn } from './overlays.js';
-import { PAGE } from './pageNavigation.js';
+import { isTapSurfaceActive } from './pageNavigation.js';
 
 export function applyWallClockProgress(scene, options = {}) {
   const nowMs = Date.now();
@@ -28,7 +28,7 @@ export function applyWallClockProgress(scene, options = {}) {
   const gain = scene.engine.tick(cappedSeconds);
   const autoTaps = scene.state.lastAutoTaps ?? 0;
 
-  if (autoTaps > 0 && scene.activePage === PAGE.TAP) {
+  if (autoTaps > 0 && isTapSurfaceActive(scene)) {
     const autoTapLevel = getAutoTapCursorCount(scene.state);
     const visibleCursors = Math.min(autoTapLevel, scene.autoTapCursors.maxSlots);
 

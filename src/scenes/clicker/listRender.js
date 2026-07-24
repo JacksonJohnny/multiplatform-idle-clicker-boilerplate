@@ -35,19 +35,11 @@ export function updateStoreListLayout(scene) {
     const unlocked = isUpgradeUnlocked(upgrade, scene.state.upgrades);
     item.isLockedPreview = !unlocked && item.id === nextLockedUpgrade?.id;
     const visible = unlocked || item.isLockedPreview;
-    const objects = [
-      item.rowBg,
-      item.label,
-      item.level,
-      item.info,
-      ...(item.stars ?? []),
-      item.buyButton,
-      item.buyText,
-    ];
+    const objects = [item.rowBg, item.label, item.level, item.info, item.cost, ...(item.stars ?? [])];
 
     objects.forEach((object) => object?.setVisible(visible));
-    if (item.buyButton.input) {
-      item.buyButton.input.enabled = unlocked;
+    if (item.rowBg.input) {
+      item.rowBg.input.enabled = unlocked;
     }
 
     if (!visible) {
@@ -116,18 +108,16 @@ export function renderStoreRows(scene) {
     const cost = preview?.cost ?? scene.engine.getUpgradeCost(item.id, buyAmount);
     if (item.isLockedPreview) {
       item.label.setText('???');
-      item.level?.setText('').setVisible(false);
+      item.level?.setText('')?.setVisible(false);
       item.info.setText(UI_TEXT.unlockHint);
+      item.cost?.setText('')?.setVisible(false);
       item.rowBg.setFillStyle(COLORS.lockedRow, 0.95).setStrokeStyle(2, COLORS.lockedRowBorder);
       item.label.setColor(COLORS.lockedText);
       item.info.setColor(COLORS.lockedInfo);
-      item.buyButton.setFillStyle(COLORS.lockedButton).setStrokeStyle(2, COLORS.lockedButtonBorder);
-      item.buyText.setText(UI_TEXT.locked).setColor(COLORS.lockedButtonText);
       item.stars?.forEach((star) => star.setVisible(false));
       return;
     }
 
-    const amount = preview?.amount ?? 1;
     const canBuy = preview?.canBuy === true;
     let effectLabel =
       upgrade.type === 'click'
@@ -143,14 +133,16 @@ export function renderStoreRows(scene) {
       }
     }
 
-    item.rowBg.setFillStyle(COLORS.upgradeRow, 0.95).setStrokeStyle(2, COLORS.upgradeRowBorder);
-    item.label.setColor(COLORS.upgradeText);
-    item.level?.setColor(COLORS.upgradeText);
-    item.info.setColor(COLORS.upgradeInfo);
+    item.rowBg
+      .setFillStyle(canBuy ? COLORS.upgradeRow : COLORS.lockedRow, 0.95)
+      .setStrokeStyle(2, canBuy ? COLORS.upgradeRowBorder : COLORS.lockedRowBorder);
+    item.label.setColor(canBuy ? COLORS.upgradeText : COLORS.lockedText);
+    item.level?.setColor(canBuy ? COLORS.upgradeText : COLORS.lockedText);
+    item.info.setColor(canBuy ? COLORS.upgradeInfo : COLORS.unavailableText);
     item.label.setText(upgrade.label);
-    item.level?.setText(`Lv.${upgrade.level}`).setVisible(item.rowBg.visible);
-    item.info.setText(`${effectLabel}  |  cost ${formatCoins(cost)}`);
-    item.buyText.setText(amount > 1 ? `BUY ${amount}` : UI_TEXT.buy);
+    item.level?.setText(`Lv.${upgrade.level}`)?.setVisible(item.rowBg.visible);
+    item.info.setText(effectLabel);
+    item.cost?.setText(formatCoins(cost))?.setColor(COLORS.whiteText)?.setVisible(item.rowBg.visible);
 
     const starCount = getGeneratorEfficiencyStarCount(scene.state, upgrade.id);
     const starStartX = item.label.x + item.label.width + 10;
@@ -164,9 +156,5 @@ export function renderStoreRows(scene) {
         }
       }
     });
-
-    item.buyButton.setFillStyle(canBuy ? COLORS.primary : COLORS.unavailableButton);
-    item.buyButton.setStrokeStyle(2, canBuy ? COLORS.primaryBorder : COLORS.disabledBorder);
-    item.buyText.setColor(canBuy ? COLORS.primaryText : COLORS.unavailableText);
   });
 }

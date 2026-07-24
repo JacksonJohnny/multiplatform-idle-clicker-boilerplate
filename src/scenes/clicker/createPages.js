@@ -1,22 +1,37 @@
 import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../../config/theme.js';
 import { UI_TEXT } from '../../config/uiText.js';
+import { IS_MOBILE_UI } from '../../config/gameConfig.js';
 import { normalizeBuyAmount } from '../../config/buyAmounts.js';
 import { ListScrollController } from '../../controllers/ListScrollController.js';
 import { buildMetaUpgradesView } from '../../ui/metaUpgradesView.js';
 import { buildStatusView } from '../../ui/statusView.js';
 import { buildPrestigeView } from '../../ui/prestigeView.js';
 import { buildSettingsView, buildSettingsButton } from '../../ui/settingsView.js';
-import { buildBottomNavigation } from '../../ui/bottomNavigation.js';
+import { buildBottomNavigation, buildDesktopTopTabs } from '../../ui/bottomNavigation.js';
 import { buildBuyAmountBar } from '../../ui/buyAmountBar.js';
 import { buildUpgradeListView } from '../../ui/upgradeListView.js';
+import { createStoreItemTooltip, bindStoreItemTooltips } from '../../ui/storeItemTooltip.js';
 import { setupListViewportCameras } from './viewportCameras.js';
-import { PAGE } from './pageNavigation.js';
+import { isStoreInteractive, PAGE } from './pageNavigation.js';
 
 function createFullHeightListLayout(
   scene,
-  { panelTop = UI_LAYOUT.panelTop, rowHeight, rowGap = 0, panelPadding = 12 } = {},
+  { panelTop = UI_LAYOUT.panelTop, rowHeight, rowGap = 0, panelPadding = 12, column = 'right' } = {},
 ) {
-  const width = scene.scale.width;
+  const cols = scene.uiColumns;
+  let colLeft;
+  let colWidth;
+  if (column === 'middle') {
+    colLeft = cols.middleLeft;
+    colWidth = cols.middleWidth || cols.leftWidth;
+  } else if (column === 'left') {
+    colLeft = 0;
+    colWidth = cols.leftWidth;
+  } else {
+    colLeft = cols.rightLeft;
+    colWidth = cols.rightWidth;
+  }
+  const colCenterX = colLeft + colWidth / 2;
   const height = scene.scale.height;
   const panelBottomMargin = scene.navHeight + 14;
   const panelHeight = height - panelTop - panelBottomMargin;
@@ -25,6 +40,9 @@ function createFullHeightListLayout(
   const panelBottomY = panelCenterY + panelHeight / 2;
   const listTop = panelTopY + panelPadding;
   const listBottom = panelBottomY - panelPadding;
+  const tight = !IS_MOBILE_UI && (column === 'right' || column === 'middle');
+  const edge = tight ? 8 : 17;
+  const padX = tight ? 16 : 24;
 
   return {
     rowHeight,
@@ -32,8 +50,11 @@ function createFullHeightListLayout(
     panelCenterY,
     panelTopY,
     panelBottomY,
-    listLeft: 24,
-    listWidth: width - 56,
+    panelCenterX: colCenterX,
+    listLeft: colLeft + edge + padX,
+    listWidth: colWidth - (edge + padX) * 2,
+    panelWidth: colWidth - edge * 2,
+    titleX: colLeft + edge + padX,
     listTop,
     listBottom,
     visibleListHeight: listBottom - listTop,
@@ -43,60 +64,39 @@ function createFullHeightListLayout(
 }
 
 export function createStorePage(scene) {
-  const width = scene.scale.width;
-  const height = scene.scale.height;
-  const compactRows = scene.state.upgrades.length > 4;
-  const rowHeight = Math.max(compactRows ? 72 : 84, 72);
-  const rowGap = compactRows ? 12 : 16;
-  const panelPadding = 12;
-  const panelTop = UI_LAYOUT.storePanelTop;
-  const panelBottomMargin = scene.navHeight + 14;
-  const maxPanelHeight = height - panelTop - panelBottomMargin;
-  const listHeight = scene.state.upgrades.length * rowHeight + (scene.state.upgrades.length - 1) * rowGap;
-  const minPanelHeight = rowHeight + panelPadding * 2;
-  const panelHeight = Math.max(minPanelHeight, Math.min(listHeight + panelPadding * 2, maxPanelHeight));
-  const panelCenterY = height - panelBottomMargin - panelHeight / 2;
-  const panelTopY = panelCenterY - panelHeight / 2;
-  const panelBottomY = panelCenterY + panelHeight / 2;
-  const listTop = panelTopY + panelPadding;
-  const listBottom = panelBottomY - panelPadding;
-
-  scene.upgradeLayout = {
+  const compactRows = IS_MOBILE_UI ? scene.state.upgrades.length > 4 : true;
+  const rowHeight = IS_MOBILE_UI ? Math.max(compactRows ? 72 : 84, 72) : 56;
+  const rowGap = IS_MOBILE_UI ? (compactRows ? 12 : 16) : 6;
+  const layout = createFullHeightListLayout(scene, {
     rowHeight,
     rowGap,
-    panelCenterY,
-    compactRows,
-    panelTopY,
-    panelBottomY,
-    listLeft: 24,
-    listWidth: width - 56,
-    listTop,
-    listBottom,
-    visibleListHeight: listBottom - listTop,
-    listHeight,
-  };
+    panelPadding: IS_MOBILE_UI ? 12 : 8,
+    column: 'right',
+  });
+  scene.upgradeLayout = { ...layout, compactRows };
 
   scene.storeTitle = scene.add
-    .text(28, UI_LAYOUT.sectionTitleY, UI_TEXT.storeTitle, {
+    .text(layout.titleX, UI_LAYOUT.sectionTitleY, UI_TEXT.storeTitle, {
       fontFamily: FONT_FAMILIES.display,
-      fontSize: '24px',
+      fontSize: IS_MOBILE_UI ? '24px' : '18px',
       color: COLORS.accentText,
     })
     .setOrigin(0, 0.5);
 
   const titleBottom = scene.storeTitle.y + scene.storeTitle.height / 2;
-  const buyBarY = (titleBottom + panelTopY) / 2;
+  const buyBarY = (titleBottom + layout.panelTopY) / 2;
 
   scene.buyAmountBar = buildBuyAmountBar({
     scene,
     y: buyBarY,
     selected: normalizeBuyAmount(scene.settings.buyAmount),
     onSelect: (amount) => scene.setBuyAmount(amount),
+    bounds: IS_MOBILE_UI ? { left: 0, width: scene.scale.width } : { left: layout.listLeft, width: layout.listWidth },
   });
   scene.buyAmountBar.setVisible(false);
 
   scene.upgradePanelBg = scene.add
-    .rectangle(width / 2, panelCenterY, width - 34, panelHeight, COLORS.storePanel, 0.86)
+    .rectangle(layout.panelCenterX, layout.panelCenterY, layout.panelWidth, layout.panelHeight, COLORS.storePanel, 0.86)
     .setStrokeStyle(2, COLORS.storePanelBorder);
 
   scene.upgradeContent = scene.add.container(0, 0);
@@ -110,24 +110,30 @@ export function createStorePage(scene) {
 }
 
 export function createMetaUpgradePage(scene) {
-  const width = scene.scale.width;
-  const layout = createFullHeightListLayout(scene, { rowHeight: 98, rowGap: 16, panelPadding: 12 });
+  const layout = createFullHeightListLayout(scene, {
+    rowHeight: 98,
+    rowGap: 16,
+    panelPadding: 12,
+    panelTop: IS_MOBILE_UI ? UI_LAYOUT.panelTop : 88,
+    column: IS_MOBILE_UI ? 'left' : 'middle',
+  });
   scene.metaLayout = layout;
 
   scene.metaUpgradesTitle = scene.add
-    .text(28, UI_LAYOUT.sectionTitleY, UI_TEXT.metaUpgradesTitle, {
+    .text(layout.titleX, UI_LAYOUT.sectionTitleY, UI_TEXT.metaUpgradesTitle, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '24px',
       color: COLORS.accentText,
     })
-    .setOrigin(0, 0.5);
+    .setOrigin(0, 0.5)
+    .setVisible(IS_MOBILE_UI);
 
   scene.metaPanelBg = scene.add
-    .rectangle(width / 2, layout.panelCenterY, width - 34, layout.panelHeight, COLORS.storePanel, 0.86)
+    .rectangle(layout.panelCenterX, layout.panelCenterY, layout.panelWidth, layout.panelHeight, COLORS.storePanel, 0.86)
     .setStrokeStyle(2, COLORS.storePanelBorder);
 
   scene.metaEmptyText = scene.add
-    .text(width / 2, layout.panelCenterY, UI_TEXT.unlockHint, {
+    .text(layout.panelCenterX, layout.panelCenterY, UI_TEXT.unlockHint, {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '20px',
       color: COLORS.mutedText,
@@ -148,13 +154,18 @@ export function createMetaUpgradePage(scene) {
 }
 
 export function createStatusPage(scene) {
-  const width = scene.scale.width;
-  const layout = createFullHeightListLayout(scene, { rowHeight: 28, rowGap: 0, panelPadding: 12 });
+  const layout = createFullHeightListLayout(scene, {
+    rowHeight: 28,
+    rowGap: 0,
+    panelPadding: IS_MOBILE_UI ? 12 : 20,
+    panelTop: IS_MOBILE_UI ? UI_LAYOUT.panelTop : 88,
+    column: IS_MOBILE_UI ? 'left' : 'middle',
+  });
   scene.statusLayout = layout;
 
   scene.statusPage = scene.add.container(0, 0).setVisible(false);
   scene.statusPanelBg = scene.add
-    .rectangle(width / 2, layout.panelCenterY, width - 34, layout.panelHeight, COLORS.storePanel, 0.86)
+    .rectangle(layout.panelCenterX, layout.panelCenterY, layout.panelWidth, layout.panelHeight, COLORS.storePanel, 0.86)
     .setStrokeStyle(2, COLORS.storePanelBorder)
     .setVisible(false);
   scene.statusContent = scene.add.container(0, 0);
@@ -162,7 +173,9 @@ export function createStatusPage(scene) {
     scene,
     content: scene.statusContent,
     listTop: layout.listTop,
+    listLeft: layout.listLeft,
   });
+  scene.statusView.title.setVisible(IS_MOBILE_UI);
   scene.statusPage.add(scene.statusView.title);
 }
 
@@ -184,12 +197,29 @@ export function createSettingsChrome(scene) {
   const settingsButton = buildSettingsButton(scene, () => scene.toggleSettingsPage());
   scene.settingsButtonBackground = settingsButton.background;
   scene.settingsButtonIcon = settingsButton.icon;
-  scene.navTabs = buildBottomNavigation({
-    scene,
-    navTop: scene.navTop,
-    navHeight: scene.navHeight,
-    onSelect: (index) => scene.selectPage(index),
-  });
+
+  if (IS_MOBILE_UI) {
+    scene.navTabs = buildBottomNavigation({
+      scene,
+      navTop: scene.navTop,
+      navHeight: scene.navHeight,
+      onSelect: (index) => scene.selectPage(index),
+    });
+  } else {
+    const cols = scene.uiColumns;
+    if (cols.middleWidth > 0) {
+      scene.add
+        .rectangle(cols.middleLeft, scene.scale.height / 2, 2, scene.scale.height, COLORS.navBorder, 0.45)
+        .setOrigin(0.5);
+    }
+    scene.add
+      .rectangle(cols.rightLeft, scene.scale.height / 2, 2, scene.scale.height, COLORS.navBorder, 0.85)
+      .setOrigin(0.5);
+    scene.navTabs = buildDesktopTopTabs({
+      scene,
+      onSelect: (index) => scene.selectPage(index),
+    });
+  }
 }
 
 export function setupListInteraction(scene) {
@@ -204,7 +234,7 @@ export function setupListInteraction(scene) {
     scene,
     layout: scene.upgradeLayout,
     items: scene.upgradeItems,
-    isEnabled: () => scene.gameStarted && scene.activePage === PAGE.STORE,
+    isEnabled: () => isStoreInteractive(scene),
   });
   scene.upgradeScroll.setup();
 
@@ -238,4 +268,7 @@ export function setupListInteraction(scene) {
   });
   scene.statusScroll.setup();
   scene.statusScroll.setVisible(false);
+
+  scene.storeTooltip = createStoreItemTooltip(scene);
+  bindStoreItemTooltips(scene);
 }

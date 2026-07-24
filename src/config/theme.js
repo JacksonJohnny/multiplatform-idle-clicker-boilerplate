@@ -9,8 +9,6 @@ export const COLORS = {
   background: 0x081018,
   accent: 0xffd166,
   accentText: '#ffd166',
-  accentActive: 0xffdf8a,
-  accentActiveText: '#ffdf8a',
   titleStroke: '#9f5f00',
   whiteText: '#ffffff',
   statsText: '#9bd3ff',
@@ -34,12 +32,8 @@ export const COLORS = {
   upgradeInfo: '#9dd7ff',
   lockedRow: 0x17232d,
   lockedRowBorder: 0x435461,
-  lockedButton: 0x344550,
-  lockedButtonBorder: 0x526672,
   lockedText: '#82909a',
   lockedInfo: '#657580',
-  lockedButtonText: '#94a2ab',
-  unavailableButton: 0x51718a,
   unavailableText: '#bcc9d4',
   nav: 0x09131c,
   navBorder: 0x28485f,
@@ -57,7 +51,6 @@ export const COLORS = {
   toggleOff: 0x672727,
   toggleOffBorder: 0xbd6565,
   toggleOffText: '#ffe0e0',
-
   danger: 0xb91c1c,
   dangerBorder: 0xf87171,
   dangerText: '#fff1f1',
@@ -68,21 +61,21 @@ export const COLORS = {
   overlayMutedText: '#79a8c5',
   startOverlay: 0x0a1119,
   startStroke: '#255d85',
-
   ascensionToken: 0x8b5cf6,
   ascensionTokenBorder: 0xc4b5fd,
 };
 
 const DESKTOP_LAYOUT = {
-  navHeight: 64,
-  titleY: 36,
-  coinsY: 88,
-  statsY: 132,
-  tapCenterYRatio: 385 / 720,
-  sectionTitleY: 168,
-  panelTop: 210,
-  storePanelTop: 230,
-
+  navHeight: 0,
+  leftRatio: 0.32,
+  storeRatio: 0.18,
+  titleY: 72,
+  coinsY: 118,
+  statsY: 158,
+  tapCenterYRatio: 0.58,
+  sectionTitleY: 78,
+  panelTop: 160,
+  sideMenuY: 48,
   settingsInsetX: 48,
   settingsY: 48,
   floatTextOffset: 150,
@@ -95,11 +88,38 @@ const MOBILE_LAYOUT = {
   statsY: 202,
   tapCenterY: 495,
   sectionTitleY: 252,
-  panelTop: 294,
-  storePanelTop: 330,
+  panelTop: 330,
   settingsInsetX: 38,
   settingsY: 48,
   floatTextOffset: 0,
 };
 
 export const UI_LAYOUT = isMobileUi() ? MOBILE_LAYOUT : DESKTOP_LAYOUT;
+
+export function getUiColumns(width) {
+  if (isMobileUi()) {
+    return {
+      leftWidth: width,
+      leftCenterX: width / 2,
+      middleLeft: width,
+      middleWidth: 0,
+      rightLeft: 0,
+      rightWidth: width,
+      rightCenterX: width / 2,
+    };
+  }
+
+  const leftWidth = Math.round(width * (UI_LAYOUT.leftRatio ?? 0.32));
+  const rightWidth = Math.round(width * (UI_LAYOUT.storeRatio ?? 0.18));
+  const middleWidth = Math.max(0, width - leftWidth - rightWidth);
+  const rightLeft = leftWidth + middleWidth;
+  return {
+    leftWidth,
+    leftCenterX: leftWidth / 2,
+    middleLeft: leftWidth,
+    middleWidth,
+    rightLeft,
+    rightWidth,
+    rightCenterX: rightLeft + rightWidth / 2,
+  };
+}

@@ -11,9 +11,9 @@ function fill(template, values) {
   return Object.entries(values).reduce((text, [key, value]) => text.replace(`{${key}}`, String(value)), template);
 }
 
-export function buildStatusView({ scene, content, listTop }) {
+export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
   const title = scene.add
-    .text(28, UI_LAYOUT.sectionTitleY, UI_TEXT.statusTitle, {
+    .text(listLeft, UI_LAYOUT.sectionTitleY, UI_TEXT.statusTitle, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '24px',
       color: COLORS.accentText,
@@ -33,7 +33,7 @@ export function buildStatusView({ scene, content, listTop }) {
     const index = items.length;
     const y = listTop + index * LINE_HEIGHT;
     const node = scene.add
-      .text(28, y, text, {
+      .text(listLeft, y, text, {
         fontFamily: FONT_FAMILIES.body,
         fontSize: '16px',
         color: COLORS.overlayText,
@@ -48,7 +48,7 @@ export function buildStatusView({ scene, content, listTop }) {
     const index = items.length;
     const baseY = listTop + index * LINE_HEIGHT;
     const midY = baseY + 8;
-    const badge = createAscensionTokenBadge(scene, 28, midY, {
+    const badge = createAscensionTokenBadge(scene, listLeft, midY, {
       size: 12,
       showLabel: false,
     });

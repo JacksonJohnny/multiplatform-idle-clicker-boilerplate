@@ -1,4 +1,5 @@
 import { COLORS } from '../../config/theme.js';
+import { IS_MOBILE_UI } from '../../config/gameConfig.js';
 
 export const PAGE = {
   UPGRADE: 0,
@@ -10,60 +11,86 @@ export const PAGE = {
 };
 
 const MAIN_PAGE_MAX = PAGE.PRESTIGE;
+const DESKTOP_PAGES = [PAGE.UPGRADE, PAGE.STATUS, PAGE.PRESTIGE];
 export const SETTINGS_PAGE = PAGE.SETTINGS;
 
+export function isTapSurfaceActive(scene) {
+  if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE) {
+    return false;
+  }
+  return IS_MOBILE_UI ? scene.activePage === PAGE.TAP : true;
+}
+
+export function isStoreInteractive(scene) {
+  if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE) {
+    return false;
+  }
+  return IS_MOBILE_UI ? scene.activePage === PAGE.STORE : true;
+}
+
+function stepMainPage(scene, direction) {
+  if (IS_MOBILE_UI) {
+    setActivePage(scene, Math.min(MAIN_PAGE_MAX, Math.max(0, scene.activePage + direction)));
+    return;
+  }
+  let i = DESKTOP_PAGES.indexOf(scene.activePage);
+  if (i < 0) i = 0;
+  setActivePage(scene, DESKTOP_PAGES[Math.min(DESKTOP_PAGES.length - 1, Math.max(0, i + direction))]);
+}
+
 export function setupPageSwipe(scene) {
-  scene.input.on('pointerdown', (pointer) => {
-    beginPageSwipe(scene, pointer);
-  });
+  if (IS_MOBILE_UI) {
+    scene.input.on('pointerdown', (pointer) => {
+      beginPageSwipe(scene, pointer);
+    });
 
-  scene.input.on('pointerup', (pointer) => {
-    if (!scene.pageSwipeStart) {
+    scene.input.on('pointerup', (pointer) => {
+      if (!scene.pageSwipeStart) {
+        scene.pageSwipeStart = null;
+        return;
+      }
+
+      const deltaX = pointer.x - scene.pageSwipeStart.x;
+      const deltaY = pointer.y - scene.pageSwipeStart.y;
       scene.pageSwipeStart = null;
-      return;
-    }
 
-    const deltaX = pointer.x - scene.pageSwipeStart.x;
-    const deltaY = pointer.y - scene.pageSwipeStart.y;
-    scene.pageSwipeStart = null;
+      const scroll =
+        scene.activePage === PAGE.STORE
+          ? scene.upgradeScroll
+          : scene.activePage === PAGE.UPGRADE
+            ? scene.metaScroll
+            : scene.activePage === PAGE.STATUS
+              ? scene.statusScroll
+              : null;
+      if (scroll?.lastGestureAxis === 'vertical') {
+        return;
+      }
 
-    const scroll =
-      scene.activePage === PAGE.STORE
-        ? scene.upgradeScroll
-        : scene.activePage === PAGE.UPGRADE
-          ? scene.metaScroll
-          : scene.activePage === PAGE.STATUS
-            ? scene.statusScroll
-            : null;
-    if (scroll?.lastGestureAxis === 'vertical') {
-      return;
-    }
+      if (Math.abs(deltaX) < 56 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+        return;
+      }
 
-    if (Math.abs(deltaX) < 56 || Math.abs(deltaX) <= Math.abs(deltaY)) {
-      return;
-    }
-
-    const direction = deltaX < 0 ? 1 : -1;
-    const next = Math.min(MAIN_PAGE_MAX, Math.max(0, scene.activePage + direction));
-    setActivePage(scene, next);
-  });
+      stepMainPage(scene, deltaX < 0 ? 1 : -1);
+    });
+  }
 
   scene.input.keyboard?.on('keydown-LEFT', () => {
     if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE || scene.offlineReturn || scene.confirmDialog) {
       return;
     }
-    setActivePage(scene, Math.max(0, scene.activePage - 1));
+    stepMainPage(scene, -1);
   });
   scene.input.keyboard?.on('keydown-RIGHT', () => {
     if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE || scene.offlineReturn || scene.confirmDialog) {
       return;
     }
-    setActivePage(scene, Math.min(MAIN_PAGE_MAX, scene.activePage + 1));
+    stepMainPage(scene, 1);
   });
 }
 
 export function beginPageSwipe(scene, pointer) {
   if (
+    !IS_MOBILE_UI ||
     !scene.gameStarted ||
     scene.activePage === SETTINGS_PAGE ||
     scene.offlineReturn ||
@@ -89,12 +116,12 @@ export function setActivePage(scene, index) {
   }
 
   scene.activePage = Math.min(SETTINGS_PAGE, Math.max(0, index));
+  const showSettings = scene.activePage === SETTINGS_PAGE;
   const showMeta = scene.activePage === PAGE.UPGRADE;
-  const showStore = scene.activePage === PAGE.STORE;
-  const showGame = scene.activePage === PAGE.TAP;
   const showStatus = scene.activePage === PAGE.STATUS;
   const showPrestige = scene.activePage === PAGE.PRESTIGE;
-  const showSettings = scene.activePage === SETTINGS_PAGE;
+  const showStore = IS_MOBILE_UI ? scene.activePage === PAGE.STORE : !showSettings;
+  const showGame = IS_MOBILE_UI ? scene.activePage === PAGE.TAP : !showSettings;
 
   scene.gamePage.setVisible(showGame);
   scene.storeTitle.setVisible(showStore);
@@ -102,7 +129,10 @@ export function setActivePage(scene, index) {
   scene.upgradePanelBg.setVisible(showStore);
   scene.upgradeCamera.setVisible(scene.gameStarted && showStore);
   scene.upgradeScroll.setVisible(showStore);
-  scene.metaUpgradesTitle.setVisible(showMeta);
+  if (!showStore) {
+    scene.storeTooltip?.hide();
+  }
+  scene.metaUpgradesTitle.setVisible(showMeta && IS_MOBILE_UI);
   scene.metaPanelBg.setVisible(showMeta);
   scene.metaCamera.setVisible(scene.gameStarted && showMeta);
   scene.metaScroll.setVisible(showMeta);
@@ -110,7 +140,9 @@ export function setActivePage(scene, index) {
   scene.statusPanelBg?.setVisible(showStatus);
   scene.statusCamera?.setVisible(scene.gameStarted && showStatus);
   scene.statusScroll?.setVisible(showStatus);
+  scene.statusView?.title?.setVisible(showStatus && IS_MOBILE_UI);
   scene.prestigePage?.setVisible(showPrestige);
+  scene.prestigeView?.title?.setVisible(showPrestige && IS_MOBILE_UI);
   scene.settingsPage.setVisible(showSettings);
 
   if (showMeta) {
@@ -128,7 +160,7 @@ export function setActivePage(scene, index) {
 
   scene.settingsButtonIcon.setColor(showSettings ? COLORS.accent : COLORS.navIndicator);
 
-  scene.navTabs.forEach((tab) => {
+  scene.navTabs?.forEach((tab) => {
     if (tab.isOverflow) {
       const inOverflow = scene.activePage >= (tab.hiddenStart ?? 0);
       tab.indicator.setVisible(inOverflow && scene.activePage !== SETTINGS_PAGE);

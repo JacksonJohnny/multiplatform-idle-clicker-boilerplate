@@ -1,19 +1,26 @@
 import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
+import { IS_MOBILE_UI } from '../config/gameConfig.js';
 import { formatCoins } from '../lib/clickerMath.js';
 import { createAscensionTokenBadge } from './ascensionTokenBadge.js';
 
 export function buildPrestigeView({ scene, container, onRequestPrestige }) {
-  const width = scene.scale.width;
+  const cols = scene.uiColumns;
+  const bandLeft = IS_MOBILE_UI ? 0 : cols.middleLeft;
+  const bandWidth = IS_MOBILE_UI ? cols.leftWidth : cols.middleWidth || cols.leftWidth;
+  const originX = bandLeft + 28;
+  const contentWidth = bandWidth - 56;
+  const centerX = bandLeft + bandWidth / 2;
   const title = scene.add
-    .text(28, UI_LAYOUT.sectionTitleY, UI_TEXT.prestigeTitle, {
+    .text(originX, UI_LAYOUT.sectionTitleY, UI_TEXT.prestigeTitle, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '24px',
       color: COLORS.accentText,
     })
-    .setOrigin(0, 0.5);
+    .setOrigin(0, 0.5)
+    .setVisible(IS_MOBILE_UI);
 
-  const tokenBadge = createAscensionTokenBadge(scene, 28, 310, {
+  const tokenBadge = createAscensionTokenBadge(scene, originX, IS_MOBILE_UI ? 310 : 120, {
     size: 16,
     fontSize: '20px',
     fontFamily: FONT_FAMILIES.display,
@@ -21,7 +28,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
   });
 
   const tokenCount = scene.add
-    .text(tokenBadge.endX + 10, 310, '', {
+    .text(tokenBadge.endX + 10, IS_MOBILE_UI ? 310 : 120, '', {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '20px',
       color: COLORS.text,
@@ -30,7 +37,7 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
     .setOrigin(0, 0.5);
 
   const summary = scene.add
-    .text(28, 360, '', {
+    .text(originX, IS_MOBILE_UI ? 360 : 170, '', {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '18px',
       color: COLORS.text,
@@ -40,20 +47,20 @@ export function buildPrestigeView({ scene, container, onRequestPrestige }) {
 
   const buttonY = scene.navTop - 48;
   const hint = scene.add
-    .text(28, buttonY - 72, UI_TEXT.prestigeHint, {
+    .text(originX, buttonY - 72, UI_TEXT.prestigeHint, {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '15px',
       color: COLORS.mutedText,
-      wordWrap: { width: width - 56 },
+      wordWrap: { width: contentWidth },
     })
     .setOrigin(0, 1);
 
   const button = scene.add
-    .rectangle(width / 2, buttonY, width - 80, 64, COLORS.primary)
+    .rectangle(centerX, buttonY, bandWidth - 80, 64, COLORS.primary)
     .setStrokeStyle(2, COLORS.primaryBorder)
     .setInteractive({ useHandCursor: true });
   const buttonText = scene.add
-    .text(width / 2, buttonY, UI_TEXT.prestigeAction, {
+    .text(centerX, buttonY, UI_TEXT.prestigeAction, {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '22px',
       color: COLORS.primaryText,
