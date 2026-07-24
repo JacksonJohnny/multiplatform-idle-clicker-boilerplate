@@ -2,9 +2,9 @@ import { COLORS, FONT_FAMILIES } from '../config/theme.js';
 import { GENERATOR_EFFICIENCY_STAR_MAX } from '../data/metaUpgrades.js';
 
 const MIN_BUY_HIT = 44;
-/** Half of row width inset (`width - 58`). */
+
 const ROW_SIDE_INSET = 29;
-/** Gap between BUY and the row's right border. */
+
 const BUY_INNER_PAD = 10;
 
 export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy }) {

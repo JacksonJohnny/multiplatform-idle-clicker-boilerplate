@@ -93,7 +93,7 @@ describe('clickerMath', () => {
   it('sums white-click equivalents for an Auto Tap wave', () => {
     const slots = getMaxAutoTapCursorSlots();
     expect(getAutoTapWaveWhiteEquivalents(2).toString()).toBe('2');
-    // 63 white + 1 blue in a 64-click wave cycling 63 cursors: 62*1 + 2 + 2 = 66
+
     expect(getAutoTapWaveWhiteEquivalents(slots + 1).toString()).toBe(String(slots + 3));
   });
 });

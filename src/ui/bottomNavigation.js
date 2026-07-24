@@ -1,23 +1,17 @@
 import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 
-/** Minimum interactive target size (accessibility). */
 const MIN_TAB_HIT = 44;
-/** When more tabs than this, show overflow "…" for the rest. */
+
 const MAX_VISIBLE_TABS = 5;
 
-/**
- * Bottom nav with ≥44px hit targets.
- * Always uses full tab labels (no short abbreviations).
- * If tabs grow past MAX_VISIBLE_TABS, shows the first N-1 + an overflow "…" control.
- */
 export function buildBottomNavigation({ scene, navTop, navHeight, onSelect, onOverflow }) {
   const width = scene.scale.width;
   const tabs = UI_TEXT.tabs;
   const height = Math.max(navHeight, MIN_TAB_HIT);
   const container = scene.add.container(0, 0).setDepth(1000);
   const background = scene.add
-    .rectangle(width / 2, navTop + height / 2, width, height, COLORS.nav, 0.98)
+    .rectangle(width / 2, navTop + height / 2, width, height, COLORS.nav, 1)
     .setStrokeStyle(2, COLORS.navBorder);
   container.add(background);
 
@@ -70,7 +64,7 @@ export function buildBottomNavigation({ scene, navTop, navHeight, onSelect, onOv
         onOverflow(tabs.slice(visibleCount).map((label, i) => ({ label, index: visibleCount + i })));
         return;
       }
-      // Default: cycle through overflow pages.
+
       const hidden = tabs.length - visibleCount;
       const current = scene.activePage ?? 0;
       const next = current < visibleCount || current >= tabs.length - 1 ? visibleCount : current + 1;
@@ -83,7 +77,6 @@ export function buildBottomNavigation({ scene, navTop, navHeight, onSelect, onOv
   return tabEntries;
 }
 
-/** Keep navHeight at least the a11y minimum. */
 export function getNavHeight() {
   return Math.max(UI_LAYOUT.navHeight, MIN_TAB_HIT);
 }

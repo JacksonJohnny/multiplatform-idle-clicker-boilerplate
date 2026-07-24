@@ -1,3 +1,5 @@
+import { isMobileUi } from './platform.js';
+
 export const FONT_FAMILIES = {
   display: 'Bungee, sans-serif',
   body: 'Nunito, sans-serif',
@@ -55,7 +57,7 @@ export const COLORS = {
   toggleOff: 0x672727,
   toggleOffBorder: 0xbd6565,
   toggleOffText: '#ffe0e0',
-  /** Destructive confirm (prestige). */
+
   danger: 0xb91c1c,
   dangerBorder: 0xf87171,
   dangerText: '#fff1f1',
@@ -66,17 +68,38 @@ export const COLORS = {
   overlayMutedText: '#79a8c5',
   startOverlay: 0x0a1119,
   startStroke: '#255d85',
-  /** Prestige currency icon (filled square beside the label). */
+
   ascensionToken: 0x8b5cf6,
   ascensionTokenBorder: 0xc4b5fd,
 };
 
-export const UI_LAYOUT = {
+const DESKTOP_LAYOUT = {
   navHeight: 64,
   titleY: 36,
   coinsY: 88,
   statsY: 132,
-  tapCenterY: 360,
+  tapCenterYRatio: 385 / 720,
   sectionTitleY: 168,
   panelTop: 210,
+  storePanelTop: 230,
+
+  settingsInsetX: 48,
+  settingsY: 48,
+  floatTextOffset: 150,
 };
+
+const MOBILE_LAYOUT = {
+  navHeight: 86,
+  titleY: 48,
+  coinsY: 134,
+  statsY: 202,
+  tapCenterY: 495,
+  sectionTitleY: 252,
+  panelTop: 294,
+  storePanelTop: 330,
+  settingsInsetX: 38,
+  settingsY: 48,
+  floatTextOffset: 0,
+};
+
+export const UI_LAYOUT = isMobileUi() ? MOBILE_LAYOUT : DESKTOP_LAYOUT;

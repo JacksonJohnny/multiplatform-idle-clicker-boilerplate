@@ -29,11 +29,6 @@ export function createAutoTapCursorLayer(scene, centerX, centerY) {
   const pulls = [];
   const maxSlots = getMaxAutoTapCursorSlots();
 
-  /**
-   * Place cursor `index` among `totalCount` visible cursors.
-   * Partially filled rings spread evenly around the full circle (`countOnRing`),
-   * not clustered into the first N slots of max capacity (that only spans ~3/4).
-   */
   function layoutForIndex(index, totalCount = cursors.length) {
     let remainingIndex = Math.max(0, index | 0);
     let remainingCount = Math.max(0, totalCount | 0);
@@ -120,8 +115,6 @@ export function createAutoTapCursorLayer(scene, centerX, centerY) {
     });
   }
 
-  // Clockwise within each ring (inner → outer). Slot order matches even spacing,
-  // so each ring gets a full 360° sweep — not a clustered ~3/4 arc.
   function getClockwiseOrder() {
     const count = cursors.length;
     return cursors
@@ -133,7 +126,6 @@ export function createAutoTapCursorLayer(scene, centerX, centerY) {
       .map((entry) => entry.index);
   }
 
-  // Cookie Clicker style: jab toward the button, one cursor at a time, clockwise.
   function playClicks(tapCount = 1, onEachClick) {
     if (cursors.length === 0 || tapCount <= 0) {
       return;
@@ -148,7 +140,7 @@ export function createAutoTapCursorLayer(scene, centerX, centerY) {
     for (let i = 0; i < total; i += 1) {
       const index = order[i % order.length];
       const delay = i * 110;
-      // Defer start so later schedules don't kill earlier jabs on the same cursor.
+
       scene.time.delayedCall(delay, () => {
         const pull = pulls[index];
         const cursor = cursors[index];

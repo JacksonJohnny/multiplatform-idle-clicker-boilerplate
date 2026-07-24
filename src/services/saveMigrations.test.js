@@ -110,7 +110,6 @@ describe('saveMigrations', () => {
   });
 
   it('preserves full progress when migrating a rich v6 save to current', () => {
-    // A real v6 save already passed star→efficiency compensation in v3; boosts are stored.
     const { state, version } = migrateSaveState(
       {
         coins: '500000',

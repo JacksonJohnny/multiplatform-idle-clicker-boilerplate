@@ -1,6 +1,5 @@
 import { COLORS } from '../../config/theme.js';
 
-/** Bottom-nav order: UPGRADE → STORE → TAP → STATUS → PRESTIGE */
 export const PAGE = {
   UPGRADE: 0,
   STORE: 1,
@@ -78,7 +77,6 @@ export function beginPageSwipe(scene, pointer) {
 }
 
 export function setActivePage(scene, index) {
-  // Keep list cameras hidden while a full-screen modal owns the view.
   if (scene.offlineReturn || scene.confirmDialog) {
     scene.activePage = Math.min(SETTINGS_PAGE, Math.max(0, index));
     scene.upgradeCamera?.setVisible(false);
@@ -128,13 +126,7 @@ export function setActivePage(scene, index) {
     scene.prestigeView?.refresh(scene.state, scene.engine.getPrestigePreview());
   }
 
-  scene.settingsButtonBackground.setFillStyle(0x000000, 0);
-  scene.settingsButtonBackground.setStrokeStyle(
-    1.5,
-    showSettings ? COLORS.accentActive : COLORS.accent,
-    showSettings ? 1 : 0.9,
-  );
-  scene.settingsButtonIcon.setColor(showSettings ? COLORS.accentActiveText : COLORS.accentText);
+  scene.settingsButtonIcon.setColor(showSettings ? COLORS.accent : COLORS.navIndicator);
 
   scene.navTabs.forEach((tab) => {
     if (tab.isOverflow) {

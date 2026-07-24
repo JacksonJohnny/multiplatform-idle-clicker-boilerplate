@@ -4,32 +4,6 @@ import { getAchievementIdleMultiplier } from '../data/achievements.js';
 import { getAscensionTokenIdleMultiplier } from './prestige.js';
 import { getAutoTapCursorTier, getMaxAutoTapCursorSlots } from './autoTapProgress.js';
 
-/**
- * Pure clicker formulas (costs, rates, multipliers, unlock checks, number format).
- * Mutable game state lives in `clickerController.js`.
- */
-
-/**
- * @typedef {object} UpgradeCatalogEntry
- * @property {string} id
- * @property {string} label
- * @property {number|string} baseCost
- * @property {number|string} baseValue
- * @property {number} [growth]
- * @property {'click'|'auto'|'auto_tap'} type
- * @property {string} [unlockAfter]
- * @property {number} [level]
- */
-
-/**
- * @typedef {object} MetaUpgradeCatalogEntry
- * @property {string} id
- * @property {string} name
- * @property {'generator'|'global'|'click_per_second'|'base_multiplier'} kind
- * @property {boolean} [purchased]
- */
-
-// Cookie Clicker formatEveryThirdPower notations ('' is index 0 after the initial /1000).
 const SCALE_FROM_MILLION = [
   '',
   ' million',
@@ -64,7 +38,6 @@ function formatWithCommas(integerString) {
   return integerString.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-// Keep the last shown digit from updating more than ~2x/sec (avoids flicker).
 function decimalsForRate(unitsPerSecond, maxDecimals) {
   const rate = Number(unitsPerSecond);
 
@@ -86,8 +59,6 @@ function formatScaleCoefficient(value, decimals) {
     .replace(/(\.\d*?)0+$/, '$1');
 }
 
-// Cookie Clicker-style Beautify: commas below 1M, "X.XXX billion" from 1M up.
-// Pass { rate } (e.g. perSecond) to drop decimals when the scale already ticks fast.
 export function formatCoins(value, options = {}) {
   const floats = typeof options === 'number' ? options : (options.floats ?? 1);
   const rate = typeof options === 'number' ? undefined : options.rate;
@@ -137,7 +108,6 @@ export function calculateUpgradeCost(upgrade) {
   return baseCost.times(growth.pow(upgrade.level)).floor();
 }
 
-/** Total cost to buy `amount` levels starting from current level (geometric series). */
 export function calculateBulkUpgradeCost(upgrade, amount) {
   const levels = Math.max(0, Math.floor(Number(amount) || 0));
   if (levels <= 0) {
@@ -154,7 +124,6 @@ export function calculateBulkUpgradeCost(upgrade, amount) {
   return first.times(growth.pow(levels).minus(1)).div(growth.minus(1)).floor();
 }
 
-/** How many levels can be bought with current coins for this upgrade. */
 function getMaxAffordableUpgradeAmount(state, upgrade) {
   if (!upgrade || !isUpgradeUnlocked(upgrade, state.upgrades)) {
     return 0;
@@ -228,7 +197,6 @@ function getPurchasedBoosts(boosts) {
   return boosts.filter((boost) => boost.purchased);
 }
 
-/** Yellow store efficiency pips: one per purchased generator efficiency meta-upgrade. */
 export function getGeneratorEfficiencyStarCount(state, generatorId) {
   if (!state?.boosts || !generatorId) {
     return 0;
@@ -255,10 +223,6 @@ export function getGeneratorAutoRate(state, upgrade) {
   return toDecimal(upgrade.baseValue).times(upgrade.level).times(getGeneratorProductionMultiplier(state, upgrade.id));
 }
 
-/**
- * Share of total idle (auto) production from one generator, 0..1.
- * Returns null when there is no idle yet or this generator contributes nothing (hide % in UI).
- */
 export function getGeneratorIdleShare(state, generatorId) {
   if (!state?.upgrades || !generatorId) {
     return null;
@@ -283,7 +247,6 @@ export function getGeneratorIdleShare(state, generatorId) {
   return own.div(total).toNumber();
 }
 
-/** Compact percent label for STORE rows (`12%`, `1.2%`, `0.08%`). */
 export function formatIdleSharePercent(share) {
   if (share == null || !(share > 0)) {
     return null;
@@ -308,7 +271,6 @@ export function isUpgradeUnlocked(upgrade, upgrades) {
   return prerequisite?.level > 0;
 }
 
-/** Derived rates / multipliers from the current economy snapshot (pure). */
 export function calculateStats(state) {
   const clickExtra = state.upgrades
     .filter((upgrade) => upgrade.type === 'click')
@@ -352,7 +314,6 @@ export function getAutoTapCursorCount(state) {
   return getAutoTapLevel(state);
 }
 
-/** White-click equivalents produced by one Auto Tap wave at the given level. */
 export function getAutoTapWaveWhiteEquivalents(level) {
   const maxSlots = getMaxAutoTapCursorSlots();
   const count = Math.min(level, maxSlots);

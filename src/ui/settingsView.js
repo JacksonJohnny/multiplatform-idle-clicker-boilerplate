@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 
@@ -39,20 +40,108 @@ export function buildSettingsView({ scene, container, onToggle }) {
   return items;
 }
 
+function parseColor(color) {
+  if (typeof color === 'number') {
+    return color;
+  }
+  if (typeof color === 'string' && color.startsWith('#')) {
+    return Number.parseInt(color.slice(1), 16);
+  }
+  return COLORS.navIndicator;
+}
+
+const SETTINGS_ICON_KEY = 'ui-settings-gear';
+const SETTINGS_ICON_TEX = 256;
+const SETTINGS_ICON_DISPLAY = 52;
+
+function ensureSettingsIconTexture(scene) {
+  if (scene.textures.exists(SETTINGS_ICON_KEY)) {
+    scene.textures.remove(SETTINGS_ICON_KEY);
+  }
+
+  const size = SETTINGS_ICON_TEX;
+  const tex = scene.textures.createCanvas(SETTINGS_ICON_KEY, size, size);
+  const ctx = tex.getContext();
+  const cx = size / 2;
+  const cy = size / 2;
+  const s = size / 52;
+  const teeth = 8;
+
+  const tipR = 12.5 * s;
+  const rootR = 8.2 * s;
+  const hubR = 5.2 * s;
+  const holeR = 3.2 * s;
+  const ringR = 24 * s;
+  const toothHalf = Math.PI / teeth / 2.6;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = Math.max(3, 2.2 * s);
+  ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+  ctx.shadowBlur = 2.2 * s;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  for (let i = 0; i < teeth; i += 1) {
+    const a = (i / teeth) * Math.PI * 2;
+    const a0 = a - toothHalf;
+    const a1 = a + toothHalf;
+    const aRoot0 = a - Math.PI / teeth;
+    const aRoot1 = a + Math.PI / teeth;
+    if (i === 0) {
+      ctx.moveTo(cx + Math.cos(aRoot0) * rootR, cy + Math.sin(aRoot0) * rootR);
+    } else {
+      ctx.lineTo(cx + Math.cos(aRoot0) * rootR, cy + Math.sin(aRoot0) * rootR);
+    }
+    ctx.lineTo(cx + Math.cos(a0) * tipR, cy + Math.sin(a0) * tipR);
+    ctx.lineTo(cx + Math.cos(a1) * tipR, cy + Math.sin(a1) * tipR);
+    ctx.lineTo(cx + Math.cos(aRoot1) * rootR, cy + Math.sin(aRoot1) * rootR);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  tex.refresh();
+  tex.setFilter(Phaser.Textures.FilterMode.LINEAR);
+}
+
 export function buildSettingsButton(scene, onToggle) {
-  const x = scene.scale.width - 38;
-  const y = 48;
+  const x = scene.scale.width - UI_LAYOUT.settingsInsetX;
+  const y = UI_LAYOUT.settingsY;
+  ensureSettingsIconTexture(scene);
+
   const background = scene.add
-    .circle(x, y, 26, 0x000000, 0)
-    .setStrokeStyle(1.5, COLORS.accent, 0.9)
+    .circle(x, y, SETTINGS_ICON_DISPLAY / 2 + 4, 0x000000, 0)
     .setInteractive({ useHandCursor: true })
     .setDepth(1100);
+
   const icon = scene.add
-    .text(x, y, '⚙', { fontFamily: FONT_FAMILIES.body, fontSize: '25px', color: COLORS.accentText, fontStyle: '800' })
+    .image(x, y, SETTINGS_ICON_KEY)
     .setOrigin(0.5)
-    .setInteractive({ useHandCursor: true })
-    .setDepth(1101);
+    .setDisplaySize(SETTINGS_ICON_DISPLAY, SETTINGS_ICON_DISPLAY)
+    .setDepth(1101)
+    .setTint(COLORS.navIndicator);
+  icon.setColor = (color) => {
+    icon.setTint(parseColor(color));
+  };
+
   background.on('pointerup', onToggle);
-  icon.on('pointerup', onToggle);
+  icon.setInteractive({ useHandCursor: true }).on('pointerup', onToggle);
   return { background, icon };
 }

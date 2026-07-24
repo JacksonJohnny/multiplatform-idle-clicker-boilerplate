@@ -1,6 +1,5 @@
 import { COLORS, FONT_FAMILIES } from '../config/theme.js';
 
-/** UPGRADE-tab list rows for meta-upgrades (catalog lives in data/metaUpgrades.js). */
 export function buildMetaUpgradesView({ scene, container, metaUpgrades, layout, onPointerDown, onBuy }) {
   const width = scene.scale.width;
   const { rowHeight, listTop } = layout;

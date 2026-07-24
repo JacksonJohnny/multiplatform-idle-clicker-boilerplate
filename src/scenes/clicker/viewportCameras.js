@@ -1,8 +1,3 @@
-/**
- * Creates a clipped list camera and cross-ignores sibling list contents.
- * @param {Phaser.Scene} scene
- * @param {{ key: string, content: Phaser.GameObjects.Container, layout: object }[]} lists
- */
 export function setupListViewportCameras(scene, lists) {
   lists.forEach(({ key, content, layout }) => {
     const { listLeft, listTop, listWidth, visibleListHeight } = layout;
