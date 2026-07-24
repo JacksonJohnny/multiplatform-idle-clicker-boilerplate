@@ -161,8 +161,7 @@ function showConfirmDialog(
   const gapTitleBody = 28;
   const gapBodyButtons = 40;
   const gapButtons = 18;
-  const confirmH = 60;
-  const cancelH = 52;
+  const buttonH = 60;
 
   const readyFill = danger ? COLORS.danger : COLORS.primary;
   const readyBorder = danger ? COLORS.dangerBorder : COLORS.primaryBorder;
@@ -189,14 +188,14 @@ function showConfirmDialog(
     .setOrigin(0.5);
 
   const contentHeight =
-    titleText.height + gapTitleBody + bodyText.height + gapBodyButtons + confirmH + gapButtons + cancelH;
+    titleText.height + gapTitleBody + bodyText.height + gapBodyButtons + buttonH + gapButtons + buttonH;
   const panelHeight = contentHeight + padY * 2;
   const stackTop = cy - contentHeight / 2;
 
   const titleY = stackTop + titleText.height / 2;
   const bodyY = titleY + titleText.height / 2 + gapTitleBody + bodyText.height / 2;
-  const confirmY = bodyY + bodyText.height / 2 + gapBodyButtons + confirmH / 2;
-  const cancelY = confirmY + confirmH / 2 + gapButtons + cancelH / 2;
+  const confirmY = bodyY + bodyText.height / 2 + gapBodyButtons + buttonH / 2;
+  const cancelY = confirmY + buttonH / 2 + gapButtons + buttonH / 2;
 
   titleText.setPosition(cx, titleY);
   bodyText.setPosition(cx, bodyY);
@@ -206,7 +205,7 @@ function showConfirmDialog(
     .rectangle(cx, cy, panelWidth, panelHeight, COLORS.overlayPanel, 1)
     .setStrokeStyle(3, COLORS.overlayBorder);
 
-  const confirmButton = scene.add.rectangle(cx, confirmY, contentWidth, confirmH, readyFill);
+  const confirmButton = scene.add.rectangle(cx, confirmY, contentWidth, buttonH, readyFill);
   const confirmText = scene.add
     .text(cx, confirmY, confirmLabel, {
       fontFamily: FONT_FAMILIES.display,
@@ -249,13 +248,13 @@ function showConfirmDialog(
   }
 
   const cancelButton = scene.add
-    .rectangle(cx, cancelY, contentWidth, cancelH, COLORS.primary)
+    .rectangle(cx, cancelY, contentWidth, buttonH, COLORS.primary)
     .setStrokeStyle(2, COLORS.primaryBorder)
     .setInteractive({ useHandCursor: true });
   const cancelText = scene.add
     .text(cx, cancelY, cancelLabel, {
       fontFamily: FONT_FAMILIES.display,
-      fontSize: '18px',
+      fontSize: '20px',
       color: COLORS.primaryText,
     })
     .setOrigin(0.5);

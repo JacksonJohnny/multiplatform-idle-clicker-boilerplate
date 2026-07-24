@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { LOOP_CONFIG, SCENE_KEY } from '../config/gameConfig.js';
-import { COLORS, FONT_FAMILIES, UI_LAYOUT } from '../config/theme.js';
+import { LOOP_CONFIG, SCENE_KEY, IS_MOBILE_UI } from '../config/gameConfig.js';
+import { COLORS, FONT_FAMILIES, UI_LAYOUT, getUiColumns } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 import { META_UPGRADES } from '../data/metaUpgrades.js';
 import { CLICKER_GENERATORS } from '../data/generators.js';
@@ -34,6 +34,8 @@ import {
   beginPageSwipe as beginPageSwipeHelper,
   setActivePage as setActivePageHelper,
   setupPageSwipe,
+  isTapSurfaceActive,
+  isStoreInteractive,
   PAGE,
   SETTINGS_PAGE,
 } from './clicker/pageNavigation.js';
@@ -71,8 +73,10 @@ export class ClickerScene extends Phaser.Scene {
 
     const width = this.scale.width;
     const height = this.scale.height;
+    this.uiColumns = getUiColumns(width);
+    this.tapCenterX = this.uiColumns.leftCenterX;
 
-    this.activePage = PAGE.TAP;
+    this.activePage = IS_MOBILE_UI ? PAGE.TAP : PAGE.UPGRADE;
     this.navHeight = getNavHeight();
     this.navTop = height - this.navHeight;
     this.tapCenterY = UI_LAYOUT.tapCenterY ?? Math.round(height * (UI_LAYOUT.tapCenterYRatio ?? 0.5));
@@ -82,7 +86,7 @@ export class ClickerScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, COLORS.background, 0.2);
 
     this.add
-      .text(width / 2, UI_LAYOUT.titleY, UI_TEXT.gameTitle, {
+      .text(this.tapCenterX, UI_LAYOUT.titleY, UI_TEXT.gameTitle, {
         fontFamily: FONT_FAMILIES.display,
         fontSize: '32px',
         color: COLORS.accentText,
@@ -91,10 +95,10 @@ export class ClickerScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    this.hudMaxWidth = width - 48;
+    this.hudMaxWidth = this.uiColumns.leftWidth - 48;
 
     this.coinsText = this.add
-      .text(width / 2, UI_LAYOUT.coinsY, '', {
+      .text(this.tapCenterX, UI_LAYOUT.coinsY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: '36px',
         color: COLORS.whiteText,
@@ -103,24 +107,24 @@ export class ClickerScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.statsText = this.add
-      .text(width / 2, UI_LAYOUT.statsY, '', {
+      .text(this.tapCenterX, UI_LAYOUT.statsY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: '18px',
         color: COLORS.statsText,
       })
       .setOrigin(0.5);
 
-    this.coreGlow = this.add.circle(width / 2, this.tapCenterY, 136, COLORS.coreGlow, 0.18);
+    this.coreGlow = this.add.circle(this.tapCenterX, this.tapCenterY, 136, COLORS.coreGlow, 0.18);
     const coreRing = this.add
-      .circle(width / 2, this.tapCenterY, 124, COLORS.coreRing, 0.12)
+      .circle(this.tapCenterX, this.tapCenterY, 124, COLORS.coreRing, 0.12)
       .setStrokeStyle(3, COLORS.coreRingBorder, 0.5);
     this.coreButton = this.add
-      .circle(width / 2, this.tapCenterY, 116, COLORS.coreButton)
+      .circle(this.tapCenterX, this.tapCenterY, 116, COLORS.coreButton)
       .setInteractive({ useHandCursor: true });
-    const coreInner = this.add.circle(width / 2, this.tapCenterY, 84, COLORS.coreInner);
+    const coreInner = this.add.circle(this.tapCenterX, this.tapCenterY, 84, COLORS.coreInner);
 
     this.buttonLabel = this.add
-      .text(width / 2, this.tapCenterY, UI_TEXT.tapButton, {
+      .text(this.tapCenterX, this.tapCenterY, UI_TEXT.tapButton, {
         fontFamily: FONT_FAMILIES.display,
         fontSize: '46px',
         color: COLORS.coreLabel,
@@ -128,7 +132,7 @@ export class ClickerScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.tapButtonVisuals = [coreRing, this.coreButton, coreInner, this.buttonLabel];
-    this.autoTapCursors = createAutoTapCursorLayer(this, width / 2, this.tapCenterY);
+    this.autoTapCursors = createAutoTapCursorLayer(this, this.tapCenterX, this.tapCenterY);
     this.gamePage.add([this.coreGlow, ...this.tapButtonVisuals, this.autoTapCursors.layer]);
 
     this.coreButton.on('pointerdown', (pointer) => {
@@ -142,7 +146,7 @@ export class ClickerScene extends Phaser.Scene {
         Phaser.Math.Distance.Between(this.corePointerDown.x, this.corePointerDown.y, pointer.x, pointer.y) > 14;
       this.corePointerDown = null;
 
-      if (!this.gameStarted || moved || this.activePage !== PAGE.TAP) {
+      if (!this.gameStarted || moved || !isTapSurfaceActive(this)) {
         return;
       }
 
@@ -169,7 +173,7 @@ export class ClickerScene extends Phaser.Scene {
     createSettingsChrome(this);
     setupListInteraction(this);
     setupPageSwipe(this);
-    this.setActivePage(PAGE.TAP);
+    this.setActivePage(this.activePage);
     this.lastProgressAtMs = Date.now();
 
     this.time.addEvent({
@@ -219,7 +223,11 @@ export class ClickerScene extends Phaser.Scene {
   }
 
   buyStoreUpgrade(upgrade) {
-    if (!this.gameStarted || this.activePage !== PAGE.STORE) {
+    if (!isStoreInteractive(this)) {
+      return;
+    }
+    const preview = this.engine.getUpgradeBuyPreview(upgrade.id, this.settings.buyAmount);
+    if (!preview?.canBuy) {
       return;
     }
     this.tryBuyUpgrade(upgrade.id, this.settings.buyAmount);
@@ -304,7 +312,7 @@ export class ClickerScene extends Phaser.Scene {
     }
 
     if (this.activePage === SETTINGS_PAGE) {
-      this.setActivePage(this.previousMainPage ?? PAGE.TAP);
+      this.setActivePage(this.previousMainPage ?? (IS_MOBILE_UI ? PAGE.TAP : PAGE.UPGRADE));
       return;
     }
 
@@ -380,6 +388,7 @@ export class ClickerScene extends Phaser.Scene {
     if (this.activePage === PAGE.PRESTIGE) {
       this.prestigeView?.refresh(this.state, this.engine.getPrestigePreview());
     }
+    this.storeTooltip?.refresh();
   }
 
   updateMetaListLayout() {
@@ -387,7 +396,7 @@ export class ClickerScene extends Phaser.Scene {
   }
 
   update() {
-    const onTapPage = this.gameStarted && this.activePage === PAGE.TAP;
+    const onTapPage = isTapSurfaceActive(this);
     this.autoTapCursors.layer.setVisible(onTapPage);
 
     this.applyWallClockProgress();

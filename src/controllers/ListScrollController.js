@@ -9,11 +9,18 @@ function defaultSyncItem(item, y, layout) {
     item.level.y = y - rowHeight * 0.22;
   }
   item.info.y = y + rowHeight * 0.22;
+  if (item.cost) {
+    item.cost.y = y + rowHeight * 0.22;
+  }
   item.stars?.forEach((star) => {
     star.y = y - rowHeight * 0.22;
   });
-  item.buyButton.y = y;
-  item.buyText.y = y;
+  if (item.buyButton) {
+    item.buyButton.y = y;
+  }
+  if (item.buyText) {
+    item.buyText.y = y;
+  }
 }
 
 export class ListScrollController {
@@ -40,7 +47,7 @@ export class ListScrollController {
 
   setup() {
     const { scene, layout } = this;
-    const trackX = scene.scale.width - 16;
+    const trackX = layout.listLeft + layout.listWidth + 8;
 
     this.track = scene.add
       .rectangle(trackX, (layout.panelTopY + layout.panelBottomY) / 2, 8, layout.visibleListHeight, 0x0b2233, 0.9)

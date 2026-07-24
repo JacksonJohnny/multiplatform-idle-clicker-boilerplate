@@ -1,156 +1,140 @@
 # Multiplatform Idle Clicker Boilerplate
 
-Generic English cross-platform idle/clicker boilerplate with **Phaser 4**, **Vite**, **Decimal.js**, **Tauri 2** (Windows / macOS / Linux), and **Capacitor 8** (Android / iOS).
+Generic English idle/clicker boilerplate: **Phaser 4** + **Vite** + **Decimal.js**, wrapped by **Tauri 2** (desktop) and **Capacitor 8** (Android / iOS).
 
-All player-facing copy, docs, and placeholder brand names are **English and generic** — replace them when you rebrand.
+Player-facing copy and placeholder brand names are **English and generic** — rebrand when you fork.
 
 Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/JacksonJohnny/multiplatform-idle-clicker-boilerplate)
 
-Base resolution: desktop `1280×720` landscape (resizes to the window); mobile `540×960` portrait. Detection is automatic (`?ui=mobile|desktop` to force).
+| Target | Resolution | Layout |
+| --- | --- | --- |
+| Desktop / web landscape | `1280×720` base (RESIZE) | Cookie Clicker–style columns |
+| Mobile | `540×960` portrait (FIT) | Bottom tabs |
+
+Force UI: `?ui=mobile` or `?ui=desktop`.  
 Placeholder ids: Tauri `com.example.idleclicker.desktop` · Capacitor `com.example.idleclicker`.
 
-Short fork/rebrand guide: [`BOILERPLATE.md`](BOILERPLATE.md).
+Fork guide: [`BOILERPLATE.md`](BOILERPLATE.md).
 
 ## Stack
 
 | Layer | Tech |
 | --- | --- |
-| Game runtime | Phaser `^4.2.1` |
+| Game | Phaser `^4.2.1` |
 | Bundler | Vite `^8.1.4` |
-| Big numbers | decimal.js `^10.6.0` |
-| Desktop | Tauri `2` (OS WebView — light for background idle / Steam) |
-| Mobile | Capacitor `^8.4.2` (Android / iOS) |
+| Numbers | decimal.js `^10.6.0` |
+| Desktop | Tauri `2` |
+| Mobile | Capacitor `^8.4.2` (add platforms when needed) |
 | Tests | Vitest `^4.1.10` |
 
-The game in `src/` is plain web. The shells only wrap `dist/`.
+`src/` is plain web. Shells only wrap `dist/`.
 
 ## Features
 
-- Decimal.js economy with exponential costs and Cookie Clicker–style formatting.
-- Manual click + 20 chained idle generators + Auto Tap (orbiting cursors).
-- **UPGRADE** tab: generic meta-upgrades; list sorted by **ascending price**.
-- **STORE** tab: buy **×1 / ×10 / ×25 / MAX**; progressive catalog with `???`.
-- Idle via **wall clock** + offline earnings (optional cap; default **uncapped**).
-- Achievements with permanent idle % bonuses.
-- Prestige → **Ascension Tokens** with **red** confirm and **5s** countdown.
-- Tabs: UPGRADE → STORE → TAP → STATUS → PRESTIGE (+ settings); ←/→ keys (desktop) and swipe.
-- Versioned save (`SAVE_VERSION = 10`) with migrations and checksum.
-- Web + desktop (Tauri) + mobile (Capacitor) builds.
+- Decimal.js economy, exponential costs, Cookie Clicker–style formatting.
+- Tap + 20 chained generators + Auto Tap (orbiting cursors).
+- Meta-upgrades (UPGRADE), store buy amounts ×1 / ×10 / ×25 / MAX, progressive `???` unlocks.
+- Wall-clock idle + offline earnings (default uncapped).
+- Achievements, prestige → Ascension Tokens (confirm + 5s countdown).
+- Versioned save (`SAVE_VERSION = 10`) with migrations + checksum.
+- **Desktop:** left TAP · middle UPGRADE / STATUS / PRESTIGE (default UPGRADE) · right STORE always on; row click to buy; hover tooltips.
+- **Mobile:** bottom tabs (UPGRADE → STORE → TAP → STATUS → PRESTIGE) + settings gear; swipe / ← →.
 
-## Naming glossary (important for forks)
+## Folder map
+
+```text
+src/
+  config/       theme, UI text, platform (mobile/desktop), gameConfig, buy amounts
+  data/         generators, upgrades, meta-upgrades, achievements
+  lib/          math, session controller, prestige, save shape, auto-tap
+  services/     save I/O + migrations, settings, feedback, storage adapter
+  ui/           Phaser views (store, meta, status, prestige, settings, tooltip…)
+  scenes/       ClickerScene + clicker/* helpers (pages, nav, overlays, scroll cams)
+  controllers/  ListScrollController
+  assets/       hand-cursor.png
+src-tauri/      Tauri 2 desktop shell
+capacitor.config.json
+```
+
+## Naming glossary
 
 | Concept | Code / UI | Persistence |
 | --- | --- | --- |
-| Meta-upgrades (UPGRADE tab) | Catalog `META_UPGRADES`, UI `meta*` | Legacy field **`boosts`** — do not rename without a migration |
-| Ascension Tokens | `ascensionTokens`, purple badge | `ascensionTokens` (ex-`stars` in v8) |
-| Yellow ★ on STORE | Efficiency pips | Derived from efficiency purchases in `boosts` |
+| Meta-upgrades | `META_UPGRADES`, `meta*` | Save field **`boosts`** — do not rename without a migration |
+| Ascension Tokens | `ascensionTokens` | `ascensionTokens` |
+| Yellow ★ on STORE | Efficiency pips | Derived from efficiency entries in `boosts` |
 
-**Rule:** rename UI/scene freely; keep the save field `boosts` stable.
+Rename UI freely; keep `boosts` stable.
 
 ## Requirements
 
 - Node.js 20+
-- **Desktop:** [Rust](https://rustup.rs/) + (Windows) MSVC Build Tools / WebView2; (macOS) Xcode CLT; (Linux) [Tauri deps](https://v2.tauri.app/start/prerequisites/)
-- **Android:** Android Studio
-- **iOS:** macOS + Xcode
+- **Desktop:** [Rust](https://rustup.rs/) + platform WebView / build tools ([Tauri prereqs](https://v2.tauri.app/start/prerequisites/))
+- **Android:** Android Studio · **iOS:** macOS + Xcode
 
-## Development
+## Commands
 
 ```bash
 npm install
-npm run dev          # browser (Vite)
-npm run tauri:dev    # desktop Tauri
-```
-
-Validation:
-
-```bash
-npm test
-npm run build
+npm run dev           # browser
+npm run tauri:dev     # desktop
+npm test && npm run build
 ```
 
 | Script | Purpose |
 | --- | --- |
-| `npm run dev` | Vite server |
-| `npm run build` / `preview` | Web build and preview |
-| `npm run tauri:dev` / `tauri:build` | Desktop (dev / installers) |
-| `npm run android` / `ios` | Build + Capacitor sync + open IDE |
-| `npm run cap:doctor` | Capacitor environment check |
-| `npm test` / `lint` / `format` | Tests and style |
-
-## Structure
-
-```text
-src/                   Phaser game (economy, UI, save) — shared
-src-tauri/             Tauri 2 shell (desktop)
-capacitor.config.json  Capacitor (mobile; android/ios folders after cap add)
-```
+| `dev` / `build` / `preview` | Vite |
+| `tauri:dev` / `tauri:build` | Desktop |
+| `android` / `ios` | Build + Capacitor sync + open IDE |
+| `cap:add:android` / `cap:add:ios` | First-time native projects |
+| `test` / `lint` / `format` | Quality |
 
 ## Configuration
 
 ```js
 // src/config/gameConfig.js
-GAME_CONFIG = desktop 1280×720 (RESIZE) · mobile 540×960 (FIT) — picked via isMobileUi()
-LOOP_CONFIG = {
-  autoSaveDelayMs: 10000,
-  maxOfflineSeconds: null, // null = no offline earnings cap
-}
-SAVE_KEY = 'clicker-phaser-save-v1' // NEVER rename — use SAVE_VERSION + migrations
-SAVE_VERSION = 10
+GAME_CONFIG   // desktop 1280×720 RESIZE · mobile 540×960 FIT (via isMobileUi())
+LOOP_CONFIG   // autoSaveDelayMs: 10000, maxOfflineSeconds: null
+SAVE_KEY      // 'clicker-phaser-save-v1' — NEVER rename; bump SAVE_VERSION + migrate
+SAVE_VERSION  // 10
 ```
 
-Optional env (`.env.example`): `VITE_SAVE_KEY`.  
-Desktop identifier: `src-tauri/tauri.conf.json`. Mobile `appId`: `capacitor.config.json`.
+Optional `.env`: `VITE_SAVE_KEY` (see `.env.example`).  
+Desktop id/window: `src-tauri/tauri.conf.json`. Mobile `appId`: `capacitor.config.json`.
 
-Lock native Android/iOS apps to **portrait** (matches `540×960`). Desktop / Steam stay landscape.
+Lock native mobile apps to **portrait**. Desktop / Steam stay landscape.
 
-## Save and migrations
+## Save
 
-**Status: shippable.** Old saves migrate up to `SAVE_VERSION = 10`. Pipeline and history live in [`saveMigrations.js`](src/services/saveMigrations.js).
+Autosave every 10s + flush on blur / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
+Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js).
 
-Autosave every 10s + flush on blur / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.
-
-## Customization
+## Customize
 
 1. Look — `src/config/theme.js`
-2. Copy (English placeholders) — `src/config/uiText.js`
-3. Resolution / loops / save — `src/config/gameConfig.js`
+2. Copy — `src/config/uiText.js`
+3. Loops / save / resolution — `gameConfig.js`, `platform.js`
 4. Catalogs — `src/data/`
 5. Desktop — `src-tauri/tauri.conf.json`
-6. Mobile — `capacitor.config.json` (+ Android Studio / Xcode)
+6. Mobile — `capacitor.config.json`
 
-Then: `npm test` && `npm run build`.
+Then: `npm test && npm run build`.
 
 ## Desktop / Steam
 
 ```bash
-npm run tauri:dev
-npm run tauri:build   # artifacts under src-tauri/target/release/bundle/
+npm run tauri:build   # src-tauri/target/release/bundle/
 ```
 
-Steam Partner checklist (no Steamworks SDK in this base): create an App + Win/Mac/Linux depots, upload via SteamPipe. Steamworks (achievements / cloud) = phase 2.
+Steam Partner: App + depots via SteamPipe. Steamworks SDK is out of scope for this base.
 
 ## Android / iOS
 
-Capacitor packages (`@capacitor/core`, platform) are installed when you add a platform — they are not pre-bundled.
+`@capacitor/core` / platforms install when you `cap add` — not pre-bundled.
 
 ```bash
-# first time
-npm run build && npm run cap:add:android
-npm run android
-
-# iOS (macOS)
-npm run build && npm run cap:add:ios
-npm run ios
-```
-
-`npm run cap:doctor` checks the native environment.
-
-## Web deploy
-
-```bash
-npm run build
-npm run preview
+npm run build && npm run cap:add:android && npm run android
+# iOS (macOS): cap:add:ios && npm run ios
 ```
 
 ## License

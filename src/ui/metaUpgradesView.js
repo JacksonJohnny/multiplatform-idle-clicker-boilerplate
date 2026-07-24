@@ -1,25 +1,26 @@
 import { COLORS, FONT_FAMILIES } from '../config/theme.js';
 
 export function buildMetaUpgradesView({ scene, container, metaUpgrades, layout, onPointerDown, onBuy }) {
-  const width = scene.scale.width;
-  const { rowHeight, listTop } = layout;
+  const { rowHeight, listTop, listLeft, listWidth } = layout;
   const buyButtonWidth = 148;
   const buyButtonHeight = Math.max(44, 58);
-  const buyButtonX = width - buyButtonWidth / 2 - 34;
+  const rowCenterX = listLeft + listWidth / 2;
+  const buyButtonX = listLeft + listWidth - buyButtonWidth / 2 - 10;
+  const labelX = listLeft + 14;
 
   return metaUpgrades.map((meta) => {
     const y = listTop + rowHeight / 2;
     const background = scene.add
-      .rectangle(width / 2, y, width - 58, rowHeight, COLORS.panel, 0.96)
+      .rectangle(rowCenterX, y, listWidth - 2, rowHeight, COLORS.panel, 0.96)
       .setStrokeStyle(2, COLORS.panelBorder);
     const name = scene.add
-      .text(38, y - 22, meta.name, { fontFamily: FONT_FAMILIES.display, fontSize: '18px', color: COLORS.text })
+      .text(labelX, y - 22, meta.name, { fontFamily: FONT_FAMILIES.display, fontSize: '18px', color: COLORS.text })
       .setOrigin(0, 0.5);
     const condition = scene.add
-      .text(38, y + 8, '', { fontFamily: FONT_FAMILIES.body, fontSize: '15px', color: COLORS.mutedText })
+      .text(labelX, y + 8, '', { fontFamily: FONT_FAMILIES.body, fontSize: '15px', color: COLORS.mutedText })
       .setOrigin(0, 0.5);
     const effect = scene.add
-      .text(38, y + 30, '', { fontFamily: FONT_FAMILIES.body, fontSize: '15px', color: COLORS.upgradeInfo })
+      .text(labelX, y + 30, '', { fontFamily: FONT_FAMILIES.body, fontSize: '15px', color: COLORS.upgradeInfo })
       .setOrigin(0, 0.5);
     const buyButton = scene.add
       .rectangle(buyButtonX, y, buyButtonWidth, buyButtonHeight, COLORS.primary)
