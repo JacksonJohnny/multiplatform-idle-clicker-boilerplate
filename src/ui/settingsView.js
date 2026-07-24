@@ -41,7 +41,9 @@ export function buildSettingsView({ scene, container, layout, onToggle }) {
     })
     .setOrigin(0, 0.5)
     .setVisible(false);
-  const items = [createToggle(scene, toggleBox(layout), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle)];
+  const items = [
+    createToggle(scene, toggleBox(layout), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle),
+  ];
   container.add(
     items.flatMap((item) => [item.background, item.label, item.description, item.toggle, item.valueText, item.hitArea]),
   );
