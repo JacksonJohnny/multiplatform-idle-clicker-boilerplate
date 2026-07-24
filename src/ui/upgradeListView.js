@@ -12,7 +12,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
   const costFontSize = desktopStore ? '12px' : compactRows ? '16px' : '18px';
   const rowCenterX = listLeft + listWidth / 2;
   const levelX = listLeft + listWidth - 8;
-  const labelX = listLeft + 8;
+  const labelX = listLeft + 14;
   const infoMaxWidth = Math.max(80, listWidth * 0.55);
   const starFontSize = desktopStore ? '11px' : compactRows ? '14px' : '15px';
 

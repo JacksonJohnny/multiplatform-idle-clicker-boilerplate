@@ -91,7 +91,7 @@ export function createStorePage(scene) {
     y: buyBarY,
     selected: normalizeBuyAmount(scene.settings.buyAmount),
     onSelect: (amount) => scene.setBuyAmount(amount),
-    bounds: IS_MOBILE_UI ? { left: 0, width: scene.scale.width } : { left: layout.listLeft, width: layout.listWidth },
+    bounds: { left: layout.listLeft, width: layout.listWidth },
   });
   scene.buyAmountBar.setVisible(false);
 
@@ -175,25 +175,52 @@ export function createStatusPage(scene) {
     listTop: layout.listTop,
     listLeft: layout.listLeft,
   });
-  scene.statusView.title.setVisible(IS_MOBILE_UI);
-  scene.statusPage.add(scene.statusView.title);
+  scene.statusView.title.setVisible(false);
 }
 
 export function createPrestigePage(scene) {
+  const layout = createFullHeightListLayout(scene, {
+    rowHeight: 28,
+    rowGap: 0,
+    panelPadding: 12,
+    panelTop: IS_MOBILE_UI ? UI_LAYOUT.panelTop : 88,
+    column: IS_MOBILE_UI ? 'left' : 'middle',
+  });
   scene.prestigePage = scene.add.container(0, 0).setVisible(false);
   scene.prestigeView = buildPrestigeView({
     scene,
     container: scene.prestigePage,
+    layout,
     onRequestPrestige: () => scene.requestPrestige(),
   });
 }
 
 export function createSettingsChrome(scene) {
-  scene.settingItems = buildSettingsView({
+  const layout = createFullHeightListLayout(scene, {
+    rowHeight: 78,
+    rowGap: 16,
+    panelPadding: 12,
+    panelTop: IS_MOBILE_UI ? UI_LAYOUT.panelTop : 88,
+    column: IS_MOBILE_UI ? 'left' : 'middle',
+  });
+  scene.settingsLayout = layout;
+  scene.settingsPanelBg = scene.add
+    .rectangle(layout.panelCenterX, layout.panelCenterY, layout.panelWidth, layout.panelHeight, COLORS.storePanel, 0.86)
+    .setStrokeStyle(2, COLORS.storePanelBorder)
+    .setVisible(false)
+    .setDepth(5);
+  scene.settingsPage.setDepth(6);
+
+  const settingsView = buildSettingsView({
     scene,
     container: scene.settingsPage,
+    layout,
     onToggle: (settingKey) => scene.toggleSetting(settingKey),
   });
+  scene.settingItems = settingsView.items;
+  scene.settingsTitle = settingsView.title;
+  scene.settingsPage.setVisible(false);
+
   const settingsButton = buildSettingsButton(scene, () => scene.toggleSettingsPage());
   scene.settingsButtonBackground = settingsButton.background;
   scene.settingsButtonIcon = settingsButton.icon;

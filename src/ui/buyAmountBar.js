@@ -6,9 +6,9 @@ const MIN_HIT = 44;
 
 export function buildBuyAmountBar({ scene, y, selected, onSelect, bounds }) {
   const desktop = !IS_MOBILE_UI;
-  const left = desktop ? (bounds?.left ?? 0) : 0;
-  const width = desktop ? (bounds?.width ?? scene.scale.width) : scene.scale.width;
-  const padding = desktop ? 0 : 28;
+  const left = bounds?.left ?? 0;
+  const width = bounds?.width ?? scene.scale.width;
+  const padding = bounds ? 0 : 28;
   const gap = desktop ? 4 : 10;
   const count = BUY_AMOUNT_OPTIONS.length;
   const inner = width - padding * 2;
