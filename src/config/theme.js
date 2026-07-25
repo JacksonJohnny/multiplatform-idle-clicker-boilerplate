@@ -30,6 +30,7 @@ export const COLORS = {
   upgradeRowBorder: 0x3f7ca4,
   upgradeText: '#f4f7fa',
   upgradeInfo: '#9dd7ff',
+  efficiencyPip: '#ffd43b',
   lockedRow: 0x17232d,
   lockedRowBorder: 0x435461,
   lockedText: '#82909a',

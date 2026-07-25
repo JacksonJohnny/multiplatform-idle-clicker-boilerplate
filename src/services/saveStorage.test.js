@@ -4,7 +4,7 @@ import { META_UPGRADES } from '../data/metaUpgrades.js';
 import { CLICKER_GENERATORS } from '../data/generators.js';
 import { CLICK_UPGRADES } from '../data/upgrades.js';
 import { createClickerController } from '../lib/clickerController.js';
-import { computeChecksum, loadGameState, saveGameState, unpackEnvelope } from './saveStorage.js';
+import { computeChecksum, exportSaveCode, loadGameState, parseSaveCode, saveGameState, unpackEnvelope } from './saveStorage.js';
 
 describe('saveStorage', () => {
   beforeEach(() => {
@@ -155,5 +155,25 @@ describe('saveStorage', () => {
     const unpacked = unpackEnvelope({ version, payload, checksum }, SAVE_KEY);
     expect(unpacked.verified).toBe(true);
     expect(unpacked.state.coins).toBe('1');
+  });
+
+  it('round-trips exportSaveCode through parseSaveCode', () => {
+    const code = exportSaveCode({
+      coins: '4242',
+      totalClicks: 9,
+      upgrades: [{ id: 'tap-power', level: 3 }],
+      boosts: [],
+      ascensionTokens: 12,
+    });
+    expect(code).toMatch(/^[A-Za-z0-9+/=]+$/);
+    const parsed = parseSaveCode(code);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.state.coins).toBe('4242');
+    expect(parsed.state.ascensionTokens).toBe(12);
+  });
+
+  it('rejects empty or garbage save codes', () => {
+    expect(parseSaveCode('').ok).toBe(false);
+    expect(parseSaveCode('not-a-save').ok).toBe(false);
   });
 });

@@ -1,21 +1,25 @@
 import Phaser from 'phaser';
-import { LOOP_CONFIG, SCENE_KEY, IS_MOBILE_UI } from '../config/gameConfig.js';
+import { LOOP_CONFIG, SCENE_KEY, IS_MOBILE_UI, POINTER_DRAG_THRESHOLD_PX } from '../config/gameConfig.js';
 import { COLORS, FONT_FAMILIES, UI_LAYOUT, getUiColumns } from '../config/theme.js';
 import { UI_TEXT } from '../config/uiText.js';
 import { META_UPGRADES } from '../data/metaUpgrades.js';
 import { CLICKER_GENERATORS } from '../data/generators.js';
 import { CLICK_UPGRADES } from '../data/upgrades.js';
-import { formatCoins, getAutoTapCursorCount } from '../lib/clickerMath.js';
+import { ACHIEVEMENTS } from '../data/achievements.js';
+import { formatCoins, getAutoTapLevel } from '../lib/clickerMath.js';
 import { createClickerController } from '../lib/clickerController.js';
 
-import { createFeedbackService } from '../services/feedbackService.js';
-import { loadGameState, saveGameState } from '../services/saveStorage.js';
+import { createFeedbackService } from '../ui/feedback.js';
+import { exportSaveCode, loadGameState, parseSaveCode, saveGameState } from '../services/saveStorage.js';
 import { loadSettings, saveSettings } from '../services/settingsStorage.js';
 import { getNavHeight } from '../ui/bottomNavigation.js';
 import { createAutoTapCursorLayer } from '../ui/autoTapCursors.js';
+import { createToastNotify } from '../ui/toastNotify.js';
+import { createTicker } from '../ui/ticker.js';
 import handCursorUrl from '../assets/hand-cursor.png';
 import {
   destroyStartOverlay,
+  showImportSaveConfirm,
   showOfflineReturn as showOfflineReturnOverlay,
   showPrestigeConfirm,
   showStartOverlay as showStartOverlayUI,
@@ -38,7 +42,7 @@ import {
   isStoreInteractive,
   PAGE,
 } from './clicker/pageNavigation.js';
-import { normalizeBuyAmount } from '../config/buyAmounts.js';
+import { buyAmountWithModifiers, normalizeBuyAmount } from '../config/buyAmounts.js';
 import {
   createMetaUpgradePage,
   createPrestigePage,
@@ -68,6 +72,7 @@ export class ClickerScene extends Phaser.Scene {
     this.state = this.engine.state;
     this.settings = loadSettings();
     this.feedback = createFeedbackService(this, this.settings);
+    this.toast = createToastNotify(this);
     this.gameStarted = hasSave;
 
     const width = this.scale.width;
@@ -95,6 +100,7 @@ export class ClickerScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.hudMaxWidth = this.uiColumns.leftWidth - 48;
+    this.ticker = createTicker(this);
 
     this.coinsText = this.add
       .text(this.tapCenterX, UI_LAYOUT.coinsY, '', {
@@ -142,7 +148,8 @@ export class ClickerScene extends Phaser.Scene {
     this.coreButton.on('pointerup', (pointer) => {
       const moved =
         this.corePointerDown &&
-        Phaser.Math.Distance.Between(this.corePointerDown.x, this.corePointerDown.y, pointer.x, pointer.y) > 14;
+        Phaser.Math.Distance.Between(this.corePointerDown.x, this.corePointerDown.y, pointer.x, pointer.y) >
+        POINTER_DRAG_THRESHOLD_PX;
       this.corePointerDown = null;
 
       if (!this.gameStarted || moved || !isTapSurfaceActive(this)) {
@@ -172,6 +179,7 @@ export class ClickerScene extends Phaser.Scene {
     createSettingsChrome(this);
     setupListInteraction(this);
     setupPageSwipe(this);
+    this.bindBuyAmountModifiers();
     this.setActivePage(this.activePage);
     this.lastProgressAtMs = Date.now();
 
@@ -183,7 +191,7 @@ export class ClickerScene extends Phaser.Scene {
           return;
         }
 
-        this.persist();
+        this.persist({ notify: true });
       },
     });
 
@@ -214,10 +222,35 @@ export class ClickerScene extends Phaser.Scene {
     });
   }
 
+  bindBuyAmountModifiers() {
+    if (IS_MOBILE_UI || !this.input.keyboard) {
+      return;
+    }
+    this.modKeys = {
+      ctrl: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL),
+      shift: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
+    };
+    const refresh = () => {
+      this.buyAmountBar?.refresh(this.getEffectiveBuyAmount());
+      this.renderState();
+    };
+    this.modKeys.ctrl.on('down', refresh);
+    this.modKeys.ctrl.on('up', refresh);
+    this.modKeys.shift.on('down', refresh);
+    this.modKeys.shift.on('up', refresh);
+  }
+
+  getEffectiveBuyAmount() {
+    return buyAmountWithModifiers(this.settings?.buyAmount ?? 1, {
+      shift: this.modKeys?.shift?.isDown === true,
+      ctrl: this.modKeys?.ctrl?.isDown === true,
+    });
+  }
+
   setBuyAmount(amount) {
     this.settings.buyAmount = normalizeBuyAmount(amount);
     saveSettings(this.settings);
-    this.buyAmountBar?.refresh(this.settings.buyAmount);
+    this.buyAmountBar?.refresh(this.getEffectiveBuyAmount());
     this.renderState();
   }
 
@@ -225,11 +258,12 @@ export class ClickerScene extends Phaser.Scene {
     if (!isStoreInteractive(this)) {
       return;
     }
-    const preview = this.engine.getUpgradeBuyPreview(upgrade.id, this.settings.buyAmount);
+    const buyAmount = this.getEffectiveBuyAmount();
+    const preview = this.engine.getUpgradeBuyPreview(upgrade.id, buyAmount);
     if (!preview?.canBuy) {
       return;
     }
-    this.tryBuyUpgrade(upgrade.id, this.settings.buyAmount);
+    this.tryBuyUpgrade(upgrade.id, buyAmount);
   }
 
   buyMetaUpgrade(meta) {
@@ -305,6 +339,50 @@ export class ClickerScene extends Phaser.Scene {
     this.renderSettings();
   }
 
+  async exportSave() {
+    if (!this.gameStarted || this.activePage !== PAGE.SETTINGS) {
+      return;
+    }
+    this.flushProgressAndSave();
+    const code = exportSaveCode(this.engine.snapshot());
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        window.prompt(UI_TEXT.exportSavePrompt, code);
+      }
+      this.toast.show(UI_TEXT.toastExported);
+    } catch {
+      window.prompt(UI_TEXT.exportSavePrompt, code);
+      this.toast.show(UI_TEXT.toastExported);
+    }
+  }
+
+  importSave() {
+    if (!this.gameStarted || this.activePage !== PAGE.SETTINGS || this.confirmDialog) {
+      return;
+    }
+    const pasted = window.prompt(UI_TEXT.importSavePrompt, '');
+    if (pasted == null) {
+      return;
+    }
+    const parsed = parseSaveCode(pasted);
+    if (!parsed.ok) {
+      this.toast.show(parsed.reason === 'empty' ? UI_TEXT.toastImportEmpty : UI_TEXT.toastImportFailed, {
+        danger: true,
+      });
+      return;
+    }
+    showImportSaveConfirm(this, () => {
+      this.engine.hydrate(parsed.state, { nowMs: Date.now(), maxOfflineSeconds: 0 });
+      this.state = this.engine.state;
+      this.state.lastUnlockedAchievements = [];
+      this.persist({ notify: false });
+      this.renderState();
+      this.toast.show(UI_TEXT.toastImported);
+    });
+  }
+
   toggleSettingsPage() {
     if (!this.gameStarted || this.offlineReturn || this.confirmDialog) {
       return;
@@ -370,10 +448,33 @@ export class ClickerScene extends Phaser.Scene {
     }
   }
 
+  flushAchievementToasts() {
+    const ids = this.state.lastUnlockedAchievements ?? [];
+    if (!ids.length) {
+      return;
+    }
+    this.state.lastUnlockedAchievements = [];
+    const names = ids
+      .map((id) => ACHIEVEMENTS.find((entry) => entry.id === id)?.name)
+      .filter(Boolean);
+    if (!names.length) {
+      return;
+    }
+    this.toast.show(
+      names.length === 1
+        ? UI_TEXT.toastAchievement.replace('{name}', names[0])
+        : `Achievements: ${names.join(', ')}`,
+    );
+  }
+
   renderState() {
-    this.coinsText.setText(`${formatCoins(this.state.coins, { rate: this.state.perSecond })} coins`);
+    this.coinsText.setText(
+      UI_TEXT.hudCoins.replace('{coins}', formatCoins(this.state.coins, { rate: this.state.perSecond })),
+    );
     this.statsText.setText(
-      `per tap: ${formatCoins(this.state.perClick)} | coins / sec: ${formatCoins(this.state.perSecond)}`,
+      UI_TEXT.hudStats
+        .replace('{perTap}', formatCoins(this.state.perClick))
+        .replace('{perSecond}', formatCoins(this.state.perSecond)),
     );
     this.fitHudText(this.coinsText);
     this.fitHudText(this.statsText);
@@ -388,6 +489,7 @@ export class ClickerScene extends Phaser.Scene {
       this.prestigeView?.refresh(this.state, this.engine.getPrestigePreview());
     }
     this.storeTooltip?.refresh();
+    this.flushAchievementToasts();
   }
 
   updateMetaListLayout() {
@@ -400,7 +502,7 @@ export class ClickerScene extends Phaser.Scene {
 
     this.applyWallClockProgress();
 
-    const cursorCount = onTapPage ? getAutoTapCursorCount(this.state) : 0;
+    const cursorCount = onTapPage ? getAutoTapLevel(this.state) : 0;
     this.autoTapCursors.updateOrbit(cursorCount, this.time.now);
   }
 
@@ -412,8 +514,21 @@ export class ClickerScene extends Phaser.Scene {
     flushProgressAndSaveHelper(this);
   }
 
-  persist() {
-    saveGameState(this.engine.snapshot());
+  persist(options = {}) {
+    try {
+      const ok = saveGameState(this.engine.snapshot());
+      if (!ok) {
+        this.toast?.show(UI_TEXT.toastSaveFailed, { danger: true });
+        return false;
+      }
+      if (options.notify) {
+        this.toast?.show(UI_TEXT.toastSaved);
+      }
+      return true;
+    } catch {
+      this.toast?.show(UI_TEXT.toastSaveFailed, { danger: true });
+      return false;
+    }
   }
 
   showOfflineReturn(offline) {

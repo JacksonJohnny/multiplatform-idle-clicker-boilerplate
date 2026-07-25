@@ -13,8 +13,8 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 | `src/config` | Dual layout (`platform.js`), theme, UI text, buy amounts, `SAVE_KEY` / `SAVE_VERSION` |
 | `src/data` | Generators, click upgrades, meta-upgrades, achievements |
 | `src/lib` | Math, session, Auto Tap, prestige, save shape |
-| `src/services` | Save I/O + migrations, settings, feedback, storage |
-| `src/ui` | Phaser views |
+| `src/services` | Save I/O + migrations, settings, storage |
+| `src/ui` | Phaser views + feedback / toast / ticker |
 | `src/scenes` | `ClickerScene` + `clicker/*` helpers |
 | `src/controllers` | List scroll |
 | `src-tauri` | Desktop shell |
@@ -22,7 +22,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 
 ### Desktop vs mobile UI
 
-- **Desktop:** left TAP · middle panel (UPGRADE / STATUS / PRESTIGE / settings, default UPGRADE) · right STORE always visible.
+- **Desktop:** left TAP · middle panel (UPGRADES / STATUS / PRESTIGE / settings, default UPGRADES) · right STORE always visible.
 - **Mobile:** bottom tab bar; pages swap full-screen. Do not change mobile unless asked.
 
 Override: `?ui=mobile` / `?ui=desktop` (**before** first load / hard refresh — layout freezes at import).

@@ -8,6 +8,7 @@ import {
   AUTO_TAP_VISUAL_RING_COUNT,
   getAutoTapCursorTint,
   getMaxAutoTapCursorSlots,
+  ringCapacity,
 } from '../lib/autoTapProgress.js';
 
 const HAND_CURSOR_KEY = 'hand-cursor';
@@ -16,12 +17,7 @@ const CURSOR_DISPLAY_H = AUTO_TAP_CURSOR_DISPLAY_H;
 const ORBIT_RADIUS = AUTO_TAP_ORBIT_RADIUS;
 const RING_GAP = AUTO_TAP_RING_GAP;
 const VISUAL_RING_COUNT = AUTO_TAP_VISUAL_RING_COUNT;
-const CURSOR_ARC = AUTO_TAP_CURSOR_ARC;
 const CLICK_PULL = 34;
-
-function ringCapacity(radius) {
-  return Math.max(12, Math.floor((Math.PI * 2 * radius) / CURSOR_ARC));
-}
 
 export function createAutoTapCursorLayer(scene, centerX, centerY) {
   const layer = scene.add.container(0, 0).setDepth(20);

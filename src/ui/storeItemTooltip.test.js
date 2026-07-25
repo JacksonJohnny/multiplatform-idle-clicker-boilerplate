@@ -4,6 +4,8 @@ import { buildStoreItemTooltipBody, buildStoreItemTooltipLines } from '../ui/sto
 
 describe('store item tooltip', () => {
   const state = {
+    coins: 10,
+    perSecond: 5,
     upgrades: [{ id: 'upgrade-1', label: 'Generator 1', type: 'auto', baseValue: 1, level: 2, growth: 1.15 }],
     boosts: [],
     unlockedAchievements: [],
@@ -24,5 +26,11 @@ describe('store item tooltip', () => {
     const flat = lines.flat();
     expect(flat.some((part) => part.emph && part.text === '2')).toBe(true);
     expect(flat.some((part) => part.emph && part.text.includes('100'))).toBe(true);
+  });
+
+  it('shows affordable ETA and payback for generators', () => {
+    const body = buildStoreItemTooltipBody(state, state.upgrades[0], { cost: new Decimal(100), amount: 1 });
+    expect(body).toContain('Affordable in');
+    expect(body).toContain('Payback');
   });
 });

@@ -21,18 +21,38 @@ function createToggle(scene, { centerX, rowWidth, textX, toggleX, y }, label, de
   return { settingKey, background, label: labelText, description: descriptionText, toggle, valueText, hitArea };
 }
 
-function toggleBox(layout) {
+function createActionRow(scene, { centerX, rowWidth, textX, toggleX, y }, label, description, buttonLabel, onClick) {
+  const background = scene.add
+    .rectangle(centerX, y, rowWidth, 78, COLORS.panel, 0.96)
+    .setStrokeStyle(2, COLORS.panelBorder);
+  const labelText = scene.add
+    .text(textX, y - 14, label, { fontFamily: FONT_FAMILIES.display, fontSize: '19px', color: COLORS.text })
+    .setOrigin(0, 0.5);
+  const descriptionText = scene.add
+    .text(textX, y + 18, description, { fontFamily: FONT_FAMILIES.body, fontSize: '16px', color: COLORS.mutedText })
+    .setOrigin(0, 0.5);
+  const button = scene.add.rectangle(toggleX, y, 92, 46, COLORS.primary).setStrokeStyle(2, COLORS.primaryBorder);
+  const valueText = scene.add
+    .text(toggleX, y, buttonLabel, { fontFamily: FONT_FAMILIES.display, fontSize: '14px', color: COLORS.primaryText })
+    .setOrigin(0.5);
+  const hitArea = scene.add.zone(toggleX, y, 112, 66).setInteractive({ useHandCursor: true });
+  hitArea.on('pointerup', onClick);
+  return { background, label: labelText, description: descriptionText, button, valueText, hitArea };
+}
+
+function rowBox(layout, rowIndex) {
   const toggleWidth = 92;
+  const step = layout.rowHeight + (layout.rowGap ?? 16);
   return {
     centerX: layout.listLeft + layout.listWidth / 2,
     rowWidth: layout.listWidth - 2,
     textX: layout.listLeft + 14,
     toggleX: layout.listLeft + layout.listWidth - toggleWidth / 2 - 10,
-    y: layout.listTop + layout.rowHeight / 2,
+    y: layout.listTop + layout.rowHeight / 2 + rowIndex * step,
   };
 }
 
-export function buildSettingsView({ scene, container, layout, onToggle }) {
+export function buildSettingsView({ scene, container, layout, onToggle, onExportSave, onImportSave }) {
   const title = scene.add
     .text(layout.titleX, UI_LAYOUT.sectionTitleY, UI_TEXT.settingsTitle, {
       fontFamily: FONT_FAMILIES.display,
@@ -42,12 +62,33 @@ export function buildSettingsView({ scene, container, layout, onToggle }) {
     .setOrigin(0, 0.5)
     .setVisible(false);
   const items = [
-    createToggle(scene, toggleBox(layout), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle),
+    createToggle(scene, rowBox(layout, 0), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle),
+  ];
+  const actions = [
+    createActionRow(
+      scene,
+      rowBox(layout, 1),
+      UI_TEXT.exportSave,
+      UI_TEXT.exportSaveDescription,
+      'COPY',
+      () => onExportSave?.(),
+    ),
+    createActionRow(
+      scene,
+      rowBox(layout, 2),
+      UI_TEXT.importSave,
+      UI_TEXT.importSaveDescription,
+      'PASTE',
+      () => onImportSave?.(),
+    ),
   ];
   container.add(
     items.flatMap((item) => [item.background, item.label, item.description, item.toggle, item.valueText, item.hitArea]),
   );
-  return { title, items };
+  container.add(
+    actions.flatMap((item) => [item.background, item.label, item.description, item.button, item.valueText, item.hitArea]),
+  );
+  return { title, items, actions };
 }
 
 function parseColor(color) {

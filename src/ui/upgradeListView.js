@@ -1,6 +1,6 @@
 import { COLORS, FONT_FAMILIES } from '../config/theme.js';
 import { GENERATOR_EFFICIENCY_STAR_MAX } from '../data/metaUpgrades.js';
-import { IS_MOBILE_UI } from '../config/gameConfig.js';
+import { IS_MOBILE_UI, POINTER_DRAG_THRESHOLD_PX } from '../config/gameConfig.js';
 
 export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy }) {
   const { rowHeight, rowGap, compactRows, listTop, listLeft, listWidth } = layout;
@@ -19,14 +19,14 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
   return upgrades.map((upgrade, index) => {
     const y = startY + index * step;
     const rowBg = scene.add
-      .rectangle(rowCenterX, y, listWidth - 2, rowHeight, 0x133046, 0.95)
-      .setStrokeStyle(2, 0x3f7ca4)
+      .rectangle(rowCenterX, y, listWidth - 2, rowHeight, COLORS.upgradeRow, 0.95)
+      .setStrokeStyle(2, COLORS.upgradeRowBorder)
       .setInteractive({ useHandCursor: true });
     const label = scene.add
       .text(labelX, y - rowHeight * 0.22, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: labelFontSize,
-        color: '#f4f7fa',
+        color: COLORS.upgradeText,
         fontStyle: '700',
       })
       .setOrigin(0, 0.5);
@@ -34,7 +34,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       .text(levelX, y - rowHeight * 0.22, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: labelFontSize,
-        color: '#f4f7fa',
+        color: COLORS.upgradeText,
         fontStyle: '700',
       })
       .setOrigin(1, 0.5);
@@ -44,7 +44,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
         .text(0, y - rowHeight * 0.22, '★', {
           fontFamily: 'Arial, "Segoe UI Symbol", sans-serif',
           fontSize: starFontSize,
-          color: '#ffd43b',
+          color: COLORS.efficiencyPip,
         })
         .setOrigin(0, 0.5)
         .setVisible(false),
@@ -53,7 +53,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       .text(labelX, y + rowHeight * 0.22, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: infoFontSize,
-        color: '#9dd7ff',
+        color: COLORS.upgradeInfo,
         wordWrap: { width: infoMaxWidth },
       })
       .setOrigin(0, 0.5);
@@ -72,7 +72,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
     });
     rowBg.on('pointerup', (pointer) => {
       const start = rowBg.pointerDownAt;
-      const moved = start && Math.hypot(pointer.x - start.x, pointer.y - start.y) > 14;
+      const moved = start && Math.hypot(pointer.x - start.x, pointer.y - start.y) > POINTER_DRAG_THRESHOLD_PX;
       rowBg.pointerDownAt = null;
       if (!moved) {
         onBuy(upgrade);

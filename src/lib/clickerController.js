@@ -54,7 +54,7 @@ function createInitialState(upgrades, metaUpgrades = []) {
 
 function syncAchievements(state) {
   const unlocked = new Set(state.unlockedAchievements ?? []);
-  let changed = false;
+  const newly = [];
 
   ACHIEVEMENTS.forEach((achievement) => {
     if (unlocked.has(achievement.id)) {
@@ -63,16 +63,17 @@ function syncAchievements(state) {
     try {
       if (achievement.check(state)) {
         unlocked.add(achievement.id);
-        changed = true;
+        newly.push(achievement.id);
       }
     } catch {}
   });
 
   state.unlockedAchievements = [...unlocked];
-  if (changed) {
+  if (newly.length) {
+    state.lastUnlockedAchievements = [...(state.lastUnlockedAchievements ?? []), ...newly];
     recalculateState(state);
   }
-  return changed;
+  return newly.length > 0;
 }
 
 function creditCoins(state, amount) {
@@ -203,27 +204,27 @@ function buyUpgrade(state, upgradeId, buyAmount = 1) {
   };
 }
 
-function buyMetaUpgrade(state, boostId) {
-  const boost = state.boosts.find((item) => item.id === boostId);
+function buyMetaUpgrade(state, metaUpgradeId) {
+  const meta = state.boosts.find((item) => item.id === metaUpgradeId);
 
-  if (!boost || boost.purchased) {
-    return { ok: false, reason: boost ? 'already-purchased' : 'missing-boost' };
+  if (!meta || meta.purchased) {
+    return { ok: false, reason: meta ? 'already-purchased' : 'missing-meta' };
   }
 
-  if (!isMetaUpgradeUnlocked(state, boost)) {
+  if (!isMetaUpgradeUnlocked(state, meta)) {
     return { ok: false, reason: 'locked' };
   }
 
-  const cost = toDecimal(boost.cost).floor();
+  const cost = toDecimal(meta.cost).floor();
   if (state.coins.lt(cost)) {
     return { ok: false, reason: 'insufficient-coins', cost };
   }
 
   state.coins = state.coins.minus(cost);
-  boost.purchased = true;
+  meta.purchased = true;
   recalculateState(state);
 
-  return { ok: true, cost, boost };
+  return { ok: true, cost, meta };
 }
 
 function applyAutoIncome(state, seconds = 1) {
@@ -256,9 +257,7 @@ function applyAutoTaps(state, seconds = 1, intervalSeconds = AUTO_TAP_INTERVAL_S
   const taps = waves * level;
   const whiteClickEquivalents = getAutoTapWaveWhiteEquivalents(level).times(waves);
   const gain = state.perClick.times(whiteClickEquivalents);
-  state.coins = state.coins.plus(gain);
-  state.totalCoinsEarned = toDecimal(state.totalCoinsEarned).plus(gain);
-  state.coinsThisAscension = toDecimal(state.coinsThisAscension).plus(gain);
+  creditCoins(state, gain);
   state.totalClicks += Number(whiteClickEquivalents.toFixed(0));
 
   return { gain, taps };
@@ -370,8 +369,8 @@ export function createClickerController(upgrades, metaUpgrades = []) {
       }
       return result;
     },
-    tryBuyMetaUpgrade(boostId) {
-      const result = buyMetaUpgrade(state, boostId);
+    tryBuyMetaUpgrade(metaUpgradeId) {
+      const result = buyMetaUpgrade(state, metaUpgradeId);
       if (result.ok) {
         syncAchievements(state);
       }

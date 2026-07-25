@@ -1,6 +1,6 @@
 import { LOOP_CONFIG } from '../../config/gameConfig.js';
 import { COLORS, UI_LAYOUT } from '../../config/theme.js';
-import { formatCoins, getAutoTapCursorCount } from '../../lib/clickerMath.js';
+import { formatCoins, getAutoTapLevel } from '../../lib/clickerMath.js';
 import { getAutoTapCursorMultiplier } from '../../lib/autoTapProgress.js';
 import { showOfflineReturn } from './overlays.js';
 import { isTapSurfaceActive } from './pageNavigation.js';
@@ -29,7 +29,7 @@ export function applyWallClockProgress(scene, options = {}) {
   const autoTaps = scene.state.lastAutoTaps ?? 0;
 
   if (autoTaps > 0 && isTapSurfaceActive(scene)) {
-    const autoTapLevel = getAutoTapCursorCount(scene.state);
+    const autoTapLevel = getAutoTapLevel(scene.state);
     const visibleCursors = Math.min(autoTapLevel, scene.autoTapCursors.maxSlots);
 
     scene.autoTapCursors.sync(visibleCursors);

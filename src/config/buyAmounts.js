@@ -20,3 +20,14 @@ export function normalizeBuyAmount(value) {
 export function buyAmountLabel(amount) {
   return amount === 'max' ? 'MAX' : `×${amount}`;
 }
+
+/** Desktop: Ctrl = MAX, Shift = ×10 (Ctrl wins). */
+export function buyAmountWithModifiers(baseAmount, { shift = false, ctrl = false } = {}) {
+  if (ctrl) {
+    return 'max';
+  }
+  if (shift) {
+    return 10;
+  }
+  return normalizeBuyAmount(baseAmount);
+}

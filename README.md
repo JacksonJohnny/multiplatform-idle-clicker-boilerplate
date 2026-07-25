@@ -47,8 +47,8 @@ src/
   config/       theme, UI text, platform (mobile/desktop), gameConfig, buy amounts
   data/         generators, upgrades, meta-upgrades, achievements
   lib/          math, session controller, prestige, save shape, auto-tap
-  services/     save I/O + migrations, settings, feedback, storage adapter
-  ui/           Phaser views (store, meta, status, prestige, settings, tooltip…)
+  services/     save I/O + migrations, settings, storage adapter
+  ui/           Phaser views + feedback/toast/ticker
   scenes/       ClickerScene + clicker/* helpers (pages, nav, overlays, scroll cams)
   controllers/  ListScrollController
   assets/       hand-cursor.png
@@ -109,7 +109,7 @@ Lock native mobile apps to **portrait**. Desktop / Steam stay landscape. Tighten
 ## Save
 
 Autosave every 10s + flush on hide / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
-Offline: `hydrate` from `savedAt` on load (uncapped when `maxOfflineSeconds` is `null`); resume from background shows the welcome-back modal if away ≥ 1s.  
+Offline: `hydrate` from `savedAt` on load (uncapped when `maxOfflineSeconds` is `null`); resume from background shows the welcome-back modal only when **gain > 0** and away **≥ 1s**.  
 Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js) — greenfield forks can leave the v1→10 chain alone and bump from 10.
 
 ## Customize

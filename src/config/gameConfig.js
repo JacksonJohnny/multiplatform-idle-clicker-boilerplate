@@ -16,7 +16,7 @@ const DESKTOP = {
   height: 720,
   minWidth: 960,
   minHeight: 540,
-  backgroundColor: '#111822',
+  backgroundColor: '#081018',
 };
 
 const MOBILE = {
@@ -24,10 +24,13 @@ const MOBILE = {
   height: 960,
   minWidth: 320,
   minHeight: 568,
-  backgroundColor: '#111822',
+  backgroundColor: '#081018',
 };
 
 export const GAME_CONFIG = IS_MOBILE_UI ? MOBILE : DESKTOP;
+
+/** Ignore taps that moved more than this (px) — swipe vs click. */
+export const POINTER_DRAG_THRESHOLD_PX = 14;
 
 /** null = no offline earnings cap */
 export const LOOP_CONFIG = {

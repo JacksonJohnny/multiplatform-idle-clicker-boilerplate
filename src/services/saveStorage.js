@@ -146,5 +146,47 @@ export function loadGameState() {
 
 export function saveGameState(state) {
   const normalized = normalizeSaveState(state);
-  storageSetItem(SAVE_KEY, packSavePayload(normalized));
+  return storageSetItem(SAVE_KEY, packSavePayload(normalized));
+}
+
+function utf8ToBase64(value) {
+  return btoa(unescape(encodeURIComponent(value)));
+}
+
+function utf8FromBase64(value) {
+  return decodeURIComponent(escape(atob(value)));
+}
+
+function looksLikeJson(value) {
+  const trimmed = value.trim();
+  return trimmed.startsWith('{') || trimmed.startsWith('[');
+}
+
+/** Base64 (or raw JSON envelope) for clipboard backup. */
+export function exportSaveCode(state) {
+  return utf8ToBase64(packSavePayload(normalizeSaveState(state)));
+}
+
+/** Parse a pasted export code into a migrated save state. */
+export function parseSaveCode(code) {
+  const trimmed = String(code ?? '').trim();
+  if (!trimmed) {
+    return { ok: false, reason: 'empty' };
+  }
+
+  let parsed;
+  try {
+    const json = looksLikeJson(trimmed) ? trimmed : utf8FromBase64(trimmed.replace(/\s+/g, ''));
+    parsed = JSON.parse(json);
+  } catch {
+    return { ok: false, reason: 'invalid' };
+  }
+
+  const unpacked = unpackEnvelope(parsed);
+  if (!unpacked) {
+    return { ok: false, reason: 'invalid' };
+  }
+
+  const migrated = migrateSaveState(unpacked.state, unpacked.version);
+  return { ok: true, state: migrated.state };
 }

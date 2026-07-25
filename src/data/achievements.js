@@ -1,9 +1,28 @@
+import { CLICKER_GENERATORS } from './generators.js';
+
 function hasEarnedAtLeast(totalCoinsEarned, threshold) {
   if (totalCoinsEarned?.gte) {
     return Boolean(totalCoinsEarned.gte(threshold));
   }
   return Number(totalCoinsEarned) >= threshold;
 }
+
+function generatorLabel(id) {
+  return CLICKER_GENERATORS.find((generator) => generator.id === id)?.label ?? id;
+}
+
+function ownGenerator(id, count) {
+  const label = generatorLabel(id);
+  return {
+    description: `Own ${count} ${label}`,
+    check: (s) => (s.upgrades.find((u) => u.id === id)?.level ?? 0) >= count,
+  };
+}
+
+const ownG1_10 = ownGenerator('upgrade-1', 10);
+const ownG1_50 = ownGenerator('upgrade-1', 50);
+const ownG5_25 = ownGenerator('upgrade-5', 25);
+const ownG10_1 = ownGenerator('upgrade-10', 1);
 
 export const ACHIEVEMENTS = [
   {
@@ -30,30 +49,30 @@ export const ACHIEVEMENTS = [
   {
     id: 'own-g1-10',
     name: 'Starter Pack',
-    description: 'Own 10 Generator 1',
+    description: ownG1_10.description,
     idleBonus: 0.01,
-    check: (s) => (s.upgrades.find((u) => u.id === 'upgrade-1')?.level ?? 0) >= 10,
+    check: ownG1_10.check,
   },
   {
     id: 'own-g1-50',
     name: 'Generator Fan',
-    description: 'Own 50 Generator 1',
+    description: ownG1_50.description,
     idleBonus: 0.02,
-    check: (s) => (s.upgrades.find((u) => u.id === 'upgrade-1')?.level ?? 0) >= 50,
+    check: ownG1_50.check,
   },
   {
     id: 'own-g5-25',
     name: 'Mid Tier',
-    description: 'Own 25 Generator 5',
+    description: ownG5_25.description,
     idleBonus: 0.02,
-    check: (s) => (s.upgrades.find((u) => u.id === 'upgrade-5')?.level ?? 0) >= 25,
+    check: ownG5_25.check,
   },
   {
     id: 'own-g10-1',
     name: 'Top Shelf',
-    description: 'Own 1 Generator 10',
+    description: ownG10_1.description,
     idleBonus: 0.03,
-    check: (s) => (s.upgrades.find((u) => u.id === 'upgrade-10')?.level ?? 0) >= 1,
+    check: ownG10_1.check,
   },
   {
     id: 'total-owned-100',

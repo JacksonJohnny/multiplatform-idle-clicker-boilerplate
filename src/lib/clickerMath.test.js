@@ -3,14 +3,18 @@ import {
   calculateBulkUpgradeCost,
   calculateStats,
   calculateUpgradeCost,
+  estimateGeneratorRateGain,
   formatCoins,
+  formatEta,
   formatIdleSharePercent,
   getAutoTapWaveWhiteEquivalents,
-  getGeneratorEfficiencyStarCount,
+  getGeneratorEfficiencyPipCount,
   getGeneratorIdleShare,
   isUpgradeUnlocked,
+  paybackSeconds,
+  secondsUntilAffordable,
 } from './clickerMath.js';
-import { getMaxAutoTapCursorSlots } from './autoTapProgress.js';
+import { getMaxAutoTapPowerSlots } from './autoTapProgress.js';
 
 describe('clickerMath', () => {
   it('formats small, suffixed and very large values', () => {
@@ -84,16 +88,35 @@ describe('clickerMath', () => {
       ],
     };
 
-    expect(getGeneratorEfficiencyStarCount(state, 'upgrade-1')).toBe(1);
+    expect(getGeneratorEfficiencyPipCount(state, 'upgrade-1')).toBe(1);
     const stats = calculateStats(state);
     expect(stats.perSecond.toString()).toBe('10');
     expect(stats.perClick.toString()).toBe('2');
   });
 
   it('sums white-click equivalents for an Auto Tap wave', () => {
-    const slots = getMaxAutoTapCursorSlots();
+    const slots = getMaxAutoTapPowerSlots();
     expect(getAutoTapWaveWhiteEquivalents(2).toString()).toBe('2');
 
     expect(getAutoTapWaveWhiteEquivalents(slots + 1).toString()).toBe(String(slots + 3));
+  });
+
+  it('estimates afford wait and payback', () => {
+    expect(secondsUntilAffordable(100, 100, 5)).toBe(0);
+    expect(secondsUntilAffordable(100, 50, 10)).toBe(5);
+    expect(secondsUntilAffordable(100, 0, 0)).toBe(Number.POSITIVE_INFINITY);
+    expect(paybackSeconds(100, 25)).toBe(4);
+    expect(formatEta(65)).toBe('1m 5s');
+    expect(formatEta(0)).toBe('now');
+  });
+
+  it('estimates generator rate gain for bulk buys', () => {
+    const state = {
+      upgrades: [{ id: 'upgrade-1', type: 'auto', baseValue: 2, level: 3, growth: 1.15 }],
+      boosts: [],
+      unlockedAchievements: [],
+      ascensionTokens: 0,
+    };
+    expect(estimateGeneratorRateGain(state, state.upgrades[0], 2)?.toString()).toBe('4');
   });
 });

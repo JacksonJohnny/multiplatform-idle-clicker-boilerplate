@@ -46,6 +46,9 @@
     "steam"
   ],
   "description": "Generic English multiplatform idle clicker boilerplate: Phaser + Vite, Tauri 2 (desktop), Capacitor 8 (Android/iOS).",
+  "engines": {
+    "node": ">=20"
+  },
   "author": {
     "name": "Jackson Johnny",
     "url": "https://github.com/JacksonJohnny"
