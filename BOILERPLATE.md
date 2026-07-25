@@ -22,7 +22,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 
 ### Desktop vs mobile UI
 
-- **Desktop:** left TAP · middle panel (UPGRADE / STATUS / PRESTIGE, default UPGRADE) · right STORE always visible.
+- **Desktop:** left TAP · middle panel (UPGRADE / STATUS / PRESTIGE / settings, default UPGRADE) · right STORE always visible.
 - **Mobile:** bottom tab bar; pages swap full-screen. Do not change mobile unless asked.
 
 Override: `?ui=mobile` / `?ui=desktop`.
@@ -32,14 +32,14 @@ Override: `?ui=mobile` / `?ui=desktop`.
 | Concept | Code / UI | Persist |
 | --- | --- | --- |
 | Meta-upgrades | `META_UPGRADES`, `meta*` | Field **`boosts`** |
-| Ascension Tokens | `ascensionTokens` | `ascensionTokens` |
+| Ascension Tokens | `ascensionTokens` | `ascensionTokens` — `asNonNegInt` / **never** `| 0` |
 | Efficiency ★ on STORE | Yellow pips | Derived from efficiency meta in `boosts` |
 
 ## Rebrand in 15 minutes
 
 1. Theme + title: `theme.js`, `uiText.js`
 2. Catalogs / prestige / achievements: `src/data/`, `src/lib/`
-3. Resolution / loops: `gameConfig.js` + `platform.js`
+3. Resolution / loops: `gameConfig.js` + `platform.js` (`maxOfflineSeconds: null` = uncapped offline)
 4. Desktop id/window: `src-tauri/tauri.conf.json`
 5. Mobile `appId`: `capacitor.config.json`
 6. `npm test` && `npm run build`
