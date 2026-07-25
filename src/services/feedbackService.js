@@ -1,3 +1,5 @@
+import { FONT_FAMILIES } from '../config/theme.js';
+
 export function createFeedbackService(scene, settings) {
   let audioContext = null;
 
@@ -30,7 +32,7 @@ export function createFeedbackService(scene, settings) {
   function spawnFloatingText(text, color = '#ffffff', y = 355, xOffset = 0) {
     const floatText = scene.add
       .text((scene.tapCenterX ?? scene.scale.width / 2) + xOffset, y, text, {
-        fontFamily: 'Nunito, sans-serif',
+        fontFamily: FONT_FAMILIES.body,
         fontSize: '34px',
         color,
         fontStyle: '800',

@@ -35,7 +35,7 @@ export function updateStoreListLayout(scene) {
     const unlocked = isUpgradeUnlocked(upgrade, scene.state.upgrades);
     item.isLockedPreview = !unlocked && item.id === nextLockedUpgrade?.id;
     const visible = unlocked || item.isLockedPreview;
-    const objects = [item.rowBg, item.label, item.level, item.info, item.cost, ...(item.stars ?? [])];
+    const objects = [item.rowBg, item.label, item.level, item.info, item.cost, ...(item.efficiencyPips ?? [])];
 
     objects.forEach((object) => object?.setVisible(visible));
     if (item.rowBg.input) {
@@ -114,7 +114,7 @@ export function renderStoreRows(scene) {
       item.rowBg.setFillStyle(COLORS.lockedRow, 0.95).setStrokeStyle(2, COLORS.lockedRowBorder);
       item.label.setColor(COLORS.lockedText);
       item.info.setColor(COLORS.lockedInfo);
-      item.stars?.forEach((star) => star.setVisible(false));
+      item.efficiencyPips?.forEach((pip) => pip.setVisible(false));
       return;
     }
 
@@ -146,13 +146,13 @@ export function renderStoreRows(scene) {
 
     const starCount = getGeneratorEfficiencyStarCount(scene.state, upgrade.id);
     const starStartX = item.label.x + item.label.width + 10;
-    item.stars?.forEach((star, index) => {
+    item.efficiencyPips?.forEach((pip, index) => {
       const show = index < starCount && item.rowBg.visible;
-      star.setVisible(show);
+      pip.setVisible(show);
       if (show) {
-        star.x = starStartX + index * 17;
-        if (item.level && star.x + 14 > item.level.x - item.level.width - 8) {
-          star.x = Math.max(starStartX, item.level.x - item.level.width - 8 - (starCount - 1 - index) * 17);
+        pip.x = starStartX + index * 17;
+        if (item.level && pip.x + 14 > item.level.x - item.level.width - 8) {
+          pip.x = Math.max(starStartX, item.level.x - item.level.width - 8 - (starCount - 1 - index) * 17);
         }
       }
     });

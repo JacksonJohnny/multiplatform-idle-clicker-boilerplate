@@ -105,7 +105,7 @@ export const ACHIEVEMENTS = [
     check: (s) => (s.prestigeCount ?? 0) >= 1,
   },
   {
-    id: 'stars-10',
+    id: 'ascension-tokens-10',
     name: 'Token Collector',
     description: 'Hold 10 Ascension Tokens',
     idleBonus: 0.03,

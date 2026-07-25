@@ -20,7 +20,7 @@ describe('prestige', () => {
   });
 
   it('does not wrap large token counts through int32', () => {
-    // 3258494147 | 0 === -1036473149 (the sibling-repo display bug)
+    // `| 0` truncates to signed int32: 3258494147 → -1036473149
     expect(asNonNegInt(3_258_494_147)).toBe(3_258_494_147);
     expect(3_258_494_147 | 0).toBe(-1_036_473_149);
     expect(asNonNegInt(-1_036_473_149)).toBe(3_258_494_147);

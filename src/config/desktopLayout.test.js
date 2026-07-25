@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getUiColumns } from './theme.js';
 import { getNavHeight } from '../ui/bottomNavigation.js';
 
-describe('desktop cookie-clicker layout', () => {
+describe('desktop three-column layout', () => {
   it('uses tap | middle | narrow store columns', () => {
     const cols = getUiColumns(1280);
     expect(cols.leftWidth + cols.middleWidth + cols.rightWidth).toBe(1280);

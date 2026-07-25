@@ -12,8 +12,6 @@ export const PAGE = {
 
 const MAIN_PAGE_MAX = PAGE.PRESTIGE;
 const DESKTOP_PAGES = [PAGE.UPGRADE, PAGE.STATUS, PAGE.PRESTIGE];
-export const SETTINGS_PAGE = PAGE.SETTINGS;
-
 export function isTapSurfaceActive(scene) {
   if (!scene.gameStarted) {
     return false;
@@ -75,13 +73,13 @@ export function setupPageSwipe(scene) {
   }
 
   scene.input.keyboard?.on('keydown-LEFT', () => {
-    if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE || scene.offlineReturn || scene.confirmDialog) {
+    if (!scene.gameStarted || scene.activePage === PAGE.SETTINGS || scene.offlineReturn || scene.confirmDialog) {
       return;
     }
     stepMainPage(scene, -1);
   });
   scene.input.keyboard?.on('keydown-RIGHT', () => {
-    if (!scene.gameStarted || scene.activePage === SETTINGS_PAGE || scene.offlineReturn || scene.confirmDialog) {
+    if (!scene.gameStarted || scene.activePage === PAGE.SETTINGS || scene.offlineReturn || scene.confirmDialog) {
       return;
     }
     stepMainPage(scene, 1);
@@ -92,7 +90,7 @@ export function beginPageSwipe(scene, pointer) {
   if (
     !IS_MOBILE_UI ||
     !scene.gameStarted ||
-    scene.activePage === SETTINGS_PAGE ||
+    scene.activePage === PAGE.SETTINGS ||
     scene.offlineReturn ||
     scene.confirmDialog ||
     pointer.y >= scene.navTop
@@ -105,7 +103,7 @@ export function beginPageSwipe(scene, pointer) {
 
 export function setActivePage(scene, index) {
   if (scene.offlineReturn || scene.confirmDialog) {
-    scene.activePage = Math.min(SETTINGS_PAGE, Math.max(0, index));
+    scene.activePage = Math.min(PAGE.SETTINGS, Math.max(0, index));
     scene.upgradeCamera?.setVisible(false);
     scene.metaCamera?.setVisible(false);
     scene.statusCamera?.setVisible(false);
@@ -115,8 +113,8 @@ export function setActivePage(scene, index) {
     return;
   }
 
-  scene.activePage = Math.min(SETTINGS_PAGE, Math.max(0, index));
-  const showSettings = scene.activePage === SETTINGS_PAGE;
+  scene.activePage = Math.min(PAGE.SETTINGS, Math.max(0, index));
+  const showSettings = scene.activePage === PAGE.SETTINGS;
   const showMeta = scene.activePage === PAGE.UPGRADE;
   const showStatus = scene.activePage === PAGE.STATUS;
   const showPrestige = scene.activePage === PAGE.PRESTIGE;
@@ -165,7 +163,7 @@ export function setActivePage(scene, index) {
   scene.navTabs?.forEach((tab) => {
     if (tab.isOverflow) {
       const inOverflow = scene.activePage >= (tab.hiddenStart ?? 0);
-      tab.indicator.setVisible(inOverflow && scene.activePage !== SETTINGS_PAGE);
+      tab.indicator.setVisible(inOverflow && scene.activePage !== PAGE.SETTINGS);
       tab.text.setColor(inOverflow ? COLORS.activeText : COLORS.inactiveText);
       return;
     }

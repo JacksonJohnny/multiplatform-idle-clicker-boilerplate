@@ -11,7 +11,7 @@ Repo: [JacksonJohnny/multiplatform-idle-clicker-boilerplate](https://github.com/
 | Desktop / web landscape | `1280×720` base (RESIZE) | Cookie Clicker–style columns |
 | Mobile | `540×960` portrait (FIT) | Bottom tabs |
 
-Force UI: `?ui=mobile` or `?ui=desktop`.  
+Force UI: `?ui=mobile` or `?ui=desktop` (set **before** load / hard refresh — `IS_MOBILE_UI` freezes at import).  
 Placeholder ids: Tauri `com.example.idleclicker.desktop` · Capacitor `com.example.idleclicker`.
 
 Fork guide: [`BOILERPLATE.md`](BOILERPLATE.md).
@@ -60,11 +60,12 @@ capacitor.config.json
 
 | Concept | Code / UI | Persistence |
 | --- | --- | --- |
+| Store generators | Labels `Generator N` | Ids **`upgrade-N`** — do not rename without a migration; legacy `generator-N` is aliased |
 | Meta-upgrades | `META_UPGRADES`, `meta*` | Save field **`boosts`** — do not rename without a migration |
 | Ascension Tokens | `ascensionTokens` | `ascensionTokens` — use `asNonNegInt` in [`prestige.js`](src/lib/prestige.js); **never** `| 0` (signed int32 wraps past ~2.1B) |
-| Yellow ★ on STORE | Efficiency pips | Derived from efficiency entries in `boosts` |
+| Efficiency ★ on STORE | UI `efficiencyPips` | Derived from efficiency entries in `boosts` (not prestige currency) |
 
-Rename UI freely; keep `boosts` stable.
+Rename UI freely; keep `boosts` and `upgrade-N` ids stable.
 
 ## Requirements
 
@@ -100,15 +101,16 @@ SAVE_VERSION  // 10
 ```
 
 Optional `.env`: `VITE_SAVE_KEY` (see `.env.example`).  
-Desktop id/window: `src-tauri/tauri.conf.json`. Mobile `appId`: `capacitor.config.json`.
+Desktop id/window: `src-tauri/tauri.conf.json` (Phaser base `1280×720`; Tauri default window `1600×900`, scales via RESIZE). Mobile `appId`: `capacitor.config.json`.  
+Fonts (Bungee / Nunito) load from Google CSS in `style.css` — self-host if you need offline Steam/Tauri branding.
 
-Lock native mobile apps to **portrait**. Desktop / Steam stay landscape.
+Lock native mobile apps to **portrait**. Desktop / Steam stay landscape. Tighten Tauri `csp` before a real ship (`null` is fine for the boilerplate).
 
 ## Save
 
 Autosave every 10s + flush on hide / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
 Offline: `hydrate` from `savedAt` on load (uncapped when `maxOfflineSeconds` is `null`); resume from background shows the welcome-back modal if away ≥ 1s.  
-Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js).
+Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js) — greenfield forks can leave the v1→10 chain alone and bump from 10.
 
 ## Customize
 
