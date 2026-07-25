@@ -3,6 +3,7 @@ import { cloneSave, compensateLegacyMilestoneStars, normalizeSaveState } from '.
 
 export { compensateLegacyMilestoneStars, normalizeSaveState } from '../lib/saveState.js';
 
+/** Greenfield forks: leave this v1→10 chain alone; bump SAVE_VERSION from 10 for new shape changes. */
 const MIGRATIONS = [
   {
     from: 1,

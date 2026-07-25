@@ -19,8 +19,8 @@ function cloneUpgrades(upgrades) {
   return upgrades.map((upgrade) => ({ ...upgrade, level: 0 }));
 }
 
-function cloneBoosts(boosts) {
-  return boosts.map((boost) => ({ ...boost, purchased: false }));
+function cloneMetaUpgrades(metaUpgrades) {
+  return metaUpgrades.map((meta) => ({ ...meta, purchased: false }));
 }
 
 function recalculateState(state) {
@@ -31,7 +31,7 @@ function recalculateState(state) {
   return state;
 }
 
-function createInitialState(upgrades, boosts = []) {
+function createInitialState(upgrades, metaUpgrades = []) {
   const state = {
     coins: new Decimal(0),
     totalCoinsEarned: new Decimal(0),
@@ -45,7 +45,8 @@ function createInitialState(upgrades, boosts = []) {
     autoTapProgress: 0,
     lastAutoTaps: 0,
     upgrades: cloneUpgrades(upgrades),
-    boosts: cloneBoosts(boosts),
+    // Persist field name stays `boosts` (legacy save key).
+    boosts: cloneMetaUpgrades(metaUpgrades),
   };
 
   return recalculateState(state);
@@ -333,8 +334,8 @@ function serializeState(state) {
   };
 }
 
-export function createClickerController(upgrades, boosts = []) {
-  const state = createInitialState(upgrades, boosts);
+export function createClickerController(upgrades, metaUpgrades = []) {
+  const state = createInitialState(upgrades, metaUpgrades);
 
   return {
     state,

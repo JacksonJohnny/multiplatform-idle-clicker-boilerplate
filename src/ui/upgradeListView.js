@@ -38,7 +38,8 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
         fontStyle: '700',
       })
       .setOrigin(1, 0.5);
-    const stars = Array.from({ length: GENERATOR_EFFICIENCY_STAR_MAX }, () =>
+    // Efficiency ★ pips (not prestige / Ascension Tokens).
+    const efficiencyPips = Array.from({ length: GENERATOR_EFFICIENCY_STAR_MAX }, () =>
       scene.add
         .text(0, y - rowHeight * 0.22, '★', {
           fontFamily: 'Arial, "Segoe UI Symbol", sans-serif',
@@ -78,8 +79,8 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       }
     });
 
-    const item = { id: upgrade.id, baseY: y, rowBg, label, level, info, cost, stars };
-    container.add([rowBg, label, level, info, cost, ...stars]);
+    const item = { id: upgrade.id, baseY: y, rowBg, label, level, info, cost, efficiencyPips };
+    container.add([rowBg, label, level, info, cost, ...efficiencyPips]);
     return item;
   });
 }

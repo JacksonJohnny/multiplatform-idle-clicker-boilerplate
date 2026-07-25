@@ -12,8 +12,8 @@ function defaultSyncItem(item, y, layout) {
   if (item.cost) {
     item.cost.y = y + rowHeight * 0.22;
   }
-  item.stars?.forEach((star) => {
-    star.y = y - rowHeight * 0.22;
+  item.efficiencyPips?.forEach((pip) => {
+    pip.y = y - rowHeight * 0.22;
   });
   if (item.buyButton) {
     item.buyButton.y = y;

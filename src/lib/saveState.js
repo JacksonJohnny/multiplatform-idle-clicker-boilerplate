@@ -1,8 +1,9 @@
 import { CLICKER_GENERATORS } from '../data/generators.js';
+import { asNonNegInt } from './prestige.js';
 
 /**
  * Canonical store generator ids are `upgrade-N` (stable for saves).
- * `generator-N` was a brief rename — map it back so those saves keep levels.
+ * UI labels are "Generator N". `generator-N` was a brief rename — map it back.
  */
 export const UPGRADE_ID_ALIASES = {
   'generator-1': 'upgrade-1',
@@ -48,6 +49,7 @@ function buildEfficiencyAliases() {
   }
 
   for (let n = 1; n <= 20; n += 1) {
+    // Legacy Portuguese ids from an earlier product fork.
     aliases[`geral-upgrade-${n}`] = `base-multiplier-${n}`;
   }
 
@@ -55,6 +57,11 @@ function buildEfficiencyAliases() {
 }
 
 export const BOOST_ID_ALIASES = buildEfficiencyAliases();
+
+/** Achievement id renames (unlockedAchievements array). */
+export const ACHIEVEMENT_ID_ALIASES = {
+  'stars-10': 'ascension-tokens-10',
+};
 
 /** Pre-removal star thresholds: each reached tier gave ×2 to that generator. */
 const LEGACY_MILESTONE_THRESHOLDS = [10, 25, 50, 100, 200];
@@ -168,32 +175,20 @@ export function normalizeSaveState(state) {
   next.upgrades = dedupeUpgrades(remapIds(next.upgrades, UPGRADE_ID_ALIASES).filter((entry) => entry?.id));
   next.boosts = dedupeBoosts(remapIds(next.boosts, BOOST_ID_ALIASES).filter((entry) => entry?.id));
 
-  // Prestige currency rename: stars (v7) → ascensionTokens (v8+). Keep both paths safe.
-  // Do not use `| 0` — it wraps past 2^31 into negatives (int32).
+  // Prestige currency rename: save field `stars` (v7) → `ascensionTokens` (v8+). Not UI efficiency ★.
   const rawTokens = next.ascensionTokens !== undefined ? next.ascensionTokens : next.stars;
-  let tokens = Math.floor(Number(rawTokens));
-  if (!Number.isFinite(tokens)) {
-    tokens = 0;
-  } else if (tokens < 0) {
-    tokens = tokens >>> 0;
-  }
-  next.ascensionTokens = tokens;
+  next.ascensionTokens = asNonNegInt(rawTokens ?? 0);
   delete next.stars;
-
-  if (next.prestigeCount === undefined || !Number.isFinite(Number(next.prestigeCount))) {
-    next.prestigeCount = 0;
-  } else {
-    let count = Math.floor(Number(next.prestigeCount));
-    if (count < 0) {
-      count = count >>> 0;
-    }
-    next.prestigeCount = count;
-  }
+  next.prestigeCount = asNonNegInt(next.prestigeCount ?? 0);
 
   if (!Array.isArray(next.unlockedAchievements)) {
     next.unlockedAchievements = [];
   } else {
-    next.unlockedAchievements = next.unlockedAchievements.filter((id) => typeof id === 'string');
+    next.unlockedAchievements = [
+      ...new Set(
+        next.unlockedAchievements.filter((id) => typeof id === 'string').map((id) => ACHIEVEMENT_ID_ALIASES[id] ?? id),
+      ),
+    ];
   }
 
   // Drop removed modifier system (SAVE_VERSION 10+).

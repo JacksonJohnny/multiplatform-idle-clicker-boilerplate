@@ -37,7 +37,6 @@ import {
   isTapSurfaceActive,
   isStoreInteractive,
   PAGE,
-  SETTINGS_PAGE,
 } from './clicker/pageNavigation.js';
 import { normalizeBuyAmount } from '../config/buyAmounts.js';
 import {
@@ -297,7 +296,7 @@ export class ClickerScene extends Phaser.Scene {
   }
 
   toggleSetting(settingKey) {
-    if (!this.gameStarted || this.activePage !== SETTINGS_PAGE) {
+    if (!this.gameStarted || this.activePage !== PAGE.SETTINGS) {
       return;
     }
 
@@ -311,20 +310,20 @@ export class ClickerScene extends Phaser.Scene {
       return;
     }
 
-    if (this.activePage === SETTINGS_PAGE) {
+    if (this.activePage === PAGE.SETTINGS) {
       this.setActivePage(this.previousMainPage ?? (IS_MOBILE_UI ? PAGE.TAP : PAGE.UPGRADE));
       return;
     }
 
     this.previousMainPage = this.activePage;
-    this.setActivePage(SETTINGS_PAGE);
+    this.setActivePage(PAGE.SETTINGS);
   }
 
   selectPage(index) {
     if (this.offlineReturn || this.confirmDialog) {
       return;
     }
-    if (this.activePage === SETTINGS_PAGE && index !== SETTINGS_PAGE) {
+    if (this.activePage === PAGE.SETTINGS && index !== PAGE.SETTINGS) {
       this.previousMainPage = index;
     }
     if (this.gameStarted) {
