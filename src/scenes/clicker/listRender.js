@@ -102,9 +102,7 @@ export function updateMetaListLayout(scene) {
   scene.metaEmptyText.setVisible(showHint);
   if (showHint) {
     const hintY =
-      visibleCount === 0
-        ? panelCenterY
-        : Math.min(listTop + listHeight + 36, listTop + visibleListHeight - 28);
+      visibleCount === 0 ? panelCenterY : Math.min(listTop + listHeight + 36, listTop + visibleListHeight - 28);
     scene.metaEmptyText.setPosition(panelCenterX, hintY);
   }
 }
