@@ -149,7 +149,7 @@ export class ClickerScene extends Phaser.Scene {
       const moved =
         this.corePointerDown &&
         Phaser.Math.Distance.Between(this.corePointerDown.x, this.corePointerDown.y, pointer.x, pointer.y) >
-        POINTER_DRAG_THRESHOLD_PX;
+          POINTER_DRAG_THRESHOLD_PX;
       this.corePointerDown = null;
 
       if (!this.gameStarted || moved || !isTapSurfaceActive(this)) {
@@ -454,16 +454,12 @@ export class ClickerScene extends Phaser.Scene {
       return;
     }
     this.state.lastUnlockedAchievements = [];
-    const names = ids
-      .map((id) => ACHIEVEMENTS.find((entry) => entry.id === id)?.name)
-      .filter(Boolean);
+    const names = ids.map((id) => ACHIEVEMENTS.find((entry) => entry.id === id)?.name).filter(Boolean);
     if (!names.length) {
       return;
     }
     this.toast.show(
-      names.length === 1
-        ? UI_TEXT.toastAchievement.replace('{name}', names[0])
-        : `Achievements: ${names.join(', ')}`,
+      names.length === 1 ? UI_TEXT.toastAchievement.replace('{name}', names[0]) : `Achievements: ${names.join(', ')}`,
     );
   }
 

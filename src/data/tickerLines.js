@@ -10,6 +10,6 @@ export const TICKER_LINES = Object.freeze([
 ]);
 
 export function tickerLineAt(index) {
-  const i = ((Number(index) || 0) % TICKER_LINES.length + TICKER_LINES.length) % TICKER_LINES.length;
+  const i = (((Number(index) || 0) % TICKER_LINES.length) + TICKER_LINES.length) % TICKER_LINES.length;
   return TICKER_LINES[i];
 }
