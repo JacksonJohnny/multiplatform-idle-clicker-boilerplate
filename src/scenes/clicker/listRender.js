@@ -3,7 +3,7 @@ import { UI_TEXT } from '../../config/uiText.js';
 import {
   formatCoins,
   formatIdleSharePercent,
-  getGeneratorEfficiencyStarCount,
+  getGeneratorEfficiencyPipCount,
   getGeneratorIdleShare,
   isMetaUpgradeUnlocked,
   isUpgradeUnlocked,
@@ -101,7 +101,7 @@ export function updateMetaListLayout(scene) {
 }
 
 export function renderStoreRows(scene) {
-  const buyAmount = scene.settings?.buyAmount ?? 1;
+  const buyAmount = scene.getEffectiveBuyAmount?.() ?? scene.settings?.buyAmount ?? 1;
   scene.upgradeItems.forEach((item) => {
     const upgrade = scene.state.upgrades.find((entry) => entry.id === item.id);
     const preview = scene.engine.getUpgradeBuyPreview(item.id, buyAmount);
@@ -144,7 +144,7 @@ export function renderStoreRows(scene) {
     item.info.setText(effectLabel);
     item.cost?.setText(formatCoins(cost))?.setColor(COLORS.whiteText)?.setVisible(item.rowBg.visible);
 
-    const starCount = getGeneratorEfficiencyStarCount(scene.state, upgrade.id);
+    const starCount = getGeneratorEfficiencyPipCount(scene.state, upgrade.id);
     const starStartX = item.label.x + item.label.width + 10;
     item.efficiencyPips?.forEach((pip, index) => {
       const show = index < starCount && item.rowBg.visible;

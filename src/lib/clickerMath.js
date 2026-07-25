@@ -2,7 +2,7 @@ import Decimal from 'decimal.js';
 import { normalizeBuyAmount } from '../config/buyAmounts.js';
 import { getAchievementIdleMultiplier } from '../data/achievements.js';
 import { getAscensionTokenIdleMultiplier } from './prestige.js';
-import { getAutoTapCursorTier, getMaxAutoTapCursorSlots } from './autoTapProgress.js';
+import { getAutoTapCursorTier, getMaxAutoTapPowerSlots } from './autoTapProgress.js';
 
 const SCALE_FROM_MILLION = [
   '',
@@ -197,7 +197,7 @@ function getPurchasedBoosts(boosts) {
   return boosts.filter((boost) => boost.purchased);
 }
 
-export function getGeneratorEfficiencyStarCount(state, generatorId) {
+export function getGeneratorEfficiencyPipCount(state, generatorId) {
   if (!state?.boosts || !generatorId) {
     return 0;
   }
@@ -206,6 +206,9 @@ export function getGeneratorEfficiencyStarCount(state, generatorId) {
     (boost) => boost.kind === 'generator' && boost.targetId === generatorId,
   ).length;
 }
+
+/** @deprecated Use getGeneratorEfficiencyPipCount */
+export const getGeneratorEfficiencyStarCount = getGeneratorEfficiencyPipCount;
 
 function getGeneratorProductionMultiplier(state, generatorId) {
   let multiplier = new Decimal(1);
@@ -310,12 +313,65 @@ export function getAutoTapLevel(state) {
   return state.upgrades.find((upgrade) => upgrade.type === 'auto_tap')?.level ?? 0;
 }
 
-export function getAutoTapCursorCount(state) {
-  return getAutoTapLevel(state);
+export function secondsUntilAffordable(cost, coins, perSecond) {
+  const need = toDecimal(cost).minus(toDecimal(coins));
+  if (need.lte(0)) {
+    return 0;
+  }
+  const rate = toDecimal(perSecond);
+  if (rate.lte(0)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return need.div(rate).toNumber();
+}
+
+export function estimateGeneratorRateGain(state, upgrade, amount) {
+  const levels = Math.max(0, Math.floor(Number(amount) || 0));
+  if (!upgrade || upgrade.type !== 'auto' || levels <= 0) {
+    return null;
+  }
+  const { productionMultiplier } = calculateStats(state);
+  return getGeneratorAutoRate(state, { ...upgrade, level: levels }).times(productionMultiplier);
+}
+
+export function paybackSeconds(cost, rateGain) {
+  if (rateGain == null) {
+    return null;
+  }
+  const rate = toDecimal(rateGain);
+  if (rate.lte(0)) {
+    return null;
+  }
+  return toDecimal(cost).div(rate).toNumber();
+}
+
+/** Compact ETA: 12s, 3m 5s, 1h 2m, 2d 4h. */
+export function formatEta(seconds) {
+  if (!Number.isFinite(seconds)) {
+    return null;
+  }
+  if (seconds <= 0) {
+    return 'now';
+  }
+  const total = Math.ceil(seconds);
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  if (days > 0) {
+    return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+  }
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  if (mins > 0) {
+    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+  }
+  return `${secs}s`;
 }
 
 export function getAutoTapWaveWhiteEquivalents(level) {
-  const maxSlots = getMaxAutoTapCursorSlots();
+  const maxSlots = getMaxAutoTapPowerSlots();
   const count = Math.min(level, maxSlots);
 
   if (level <= 0 || count <= 0) {

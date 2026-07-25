@@ -216,6 +216,8 @@ export function createSettingsChrome(scene) {
     container: scene.settingsPage,
     layout,
     onToggle: (settingKey) => scene.toggleSetting(settingKey),
+    onExportSave: () => scene.exportSave(),
+    onImportSave: () => scene.importSave(),
   });
   scene.settingItems = settingsView.items;
   scene.settingsTitle = settingsView.title;

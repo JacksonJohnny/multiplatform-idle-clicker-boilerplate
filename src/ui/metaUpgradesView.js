@@ -1,4 +1,5 @@
 import { COLORS, FONT_FAMILIES } from '../config/theme.js';
+import { POINTER_DRAG_THRESHOLD_PX } from '../config/gameConfig.js';
 
 export function buildMetaUpgradesView({ scene, container, metaUpgrades, layout, onPointerDown, onBuy }) {
   const { rowHeight, listTop, listLeft, listWidth } = layout;
@@ -36,7 +37,7 @@ export function buildMetaUpgradesView({ scene, container, metaUpgrades, layout, 
     });
     buyButton.on('pointerup', (pointer) => {
       const start = buyButton.pointerDownAt;
-      const moved = start && Math.hypot(pointer.x - start.x, pointer.y - start.y) > 14;
+      const moved = start && Math.hypot(pointer.x - start.x, pointer.y - start.y) > POINTER_DRAG_THRESHOLD_PX;
       buyButton.pointerDownAt = null;
       if (!moved) {
         onBuy(meta);

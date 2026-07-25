@@ -4,10 +4,14 @@ import { AUTO_TAP_INTERVAL_SECONDS } from '../data/upgrades.js';
 import { IS_MOBILE_UI } from '../config/gameConfig.js';
 import {
   formatCoins,
+  formatEta,
   formatIdleSharePercent,
   getGeneratorAutoRate,
   getGeneratorIdleShare,
   calculateStats,
+  estimateGeneratorRateGain,
+  paybackSeconds,
+  secondsUntilAffordable,
 } from '../lib/clickerMath.js';
 
 const LINE_GAP = 4;
@@ -22,7 +26,7 @@ function plain(text) {
   return { text: String(text), emph: false };
 }
 
-export function buildStoreItemTooltipLines(state, upgrade, { cost } = {}) {
+export function buildStoreItemTooltipLines(state, upgrade, { cost, amount = 1 } = {}) {
   const lines = [];
   lines.push([plain(upgrade.label)]);
   lines.push([plain(UI_TEXT.tooltipOwnedLabel), emph(upgrade.level)]);
@@ -62,6 +66,24 @@ export function buildStoreItemTooltipLines(state, upgrade, { cost } = {}) {
       emph(upgrade.baseValue),
       plain(UI_TEXT.tooltipAutoTapAfter),
     ]);
+  }
+
+  if (cost != null) {
+    lines.push([]);
+    const wait = secondsUntilAffordable(cost, state.coins, state.perSecond);
+    if (wait === 0) {
+      lines.push([emph(UI_TEXT.tooltipAffordableNow)]);
+    } else if (!Number.isFinite(wait)) {
+      lines.push([plain(UI_TEXT.tooltipAffordableNever)]);
+    } else {
+      lines.push([plain(UI_TEXT.tooltipAffordableIn), emph(formatEta(wait))]);
+    }
+
+    const rateGain = estimateGeneratorRateGain(state, upgrade, amount);
+    const payback = paybackSeconds(cost, rateGain);
+    if (payback != null) {
+      lines.push([plain(UI_TEXT.tooltipPayback), emph(formatEta(payback))]);
+    }
   }
 
   return lines;
@@ -161,9 +183,10 @@ export function createStoreItemTooltip(scene) {
     }
     wireCameras();
     const live = scene.state.upgrades.find((entry) => entry.id === upgrade.id) ?? upgrade;
-    const preview = scene.engine.getUpgradeBuyPreview(live.id, scene.settings?.buyAmount ?? 1);
+    const buyAmount = scene.getEffectiveBuyAmount?.() ?? scene.settings?.buyAmount ?? 1;
+    const preview = scene.engine.getUpgradeBuyPreview(live.id, buyAmount);
     const { width: contentW, height: contentH } = renderLines(
-      buildStoreItemTooltipLines(scene.state, live, { cost: preview?.cost }),
+      buildStoreItemTooltipLines(scene.state, live, { cost: preview?.cost, amount: preview?.amount ?? 1 }),
     );
     const width = Math.min(maxWidth, Math.max(180, contentW + pad * 2));
     const height = contentH + pad * 2;

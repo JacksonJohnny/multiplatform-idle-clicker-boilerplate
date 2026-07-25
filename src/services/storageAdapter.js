@@ -13,7 +13,10 @@ export function storageGetItem(key) {
 export function storageSetItem(key, value) {
   try {
     localStorage.setItem(key, value);
-  } catch (_error) {}
+    return true;
+  } catch (_error) {
+    return false;
+  }
 }
 
 export function storageRemoveItem(key) {

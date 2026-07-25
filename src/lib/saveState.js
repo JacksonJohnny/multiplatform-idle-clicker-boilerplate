@@ -5,31 +5,14 @@ import { asNonNegInt } from './prestige.js';
  * Canonical store generator ids are `upgrade-N` (stable for saves).
  * UI labels are "Generator N". `generator-N` was a brief rename — map it back.
  */
-export const UPGRADE_ID_ALIASES = {
-  'generator-1': 'upgrade-1',
-  'generator-2': 'upgrade-2',
-  'generator-3': 'upgrade-3',
-  'generator-4': 'upgrade-4',
-  'generator-5': 'upgrade-5',
-  'generator-6': 'upgrade-6',
-  'generator-7': 'upgrade-7',
-  'generator-8': 'upgrade-8',
-  'generator-9': 'upgrade-9',
-  'generator-10': 'upgrade-10',
-  'generator-11': 'upgrade-11',
-  'generator-12': 'upgrade-12',
-  'generator-13': 'upgrade-13',
-  'generator-14': 'upgrade-14',
-  'generator-15': 'upgrade-15',
-  'generator-16': 'upgrade-16',
-  'generator-17': 'upgrade-17',
-  'generator-18': 'upgrade-18',
-  'generator-19': 'upgrade-19',
-  'generator-20': 'upgrade-20',
-};
+export const UPGRADE_ID_ALIASES = Object.fromEntries(
+  CLICKER_GENERATORS.map((generator) => {
+    const n = generator.id.replace(/^upgrade-/, '');
+    return [`generator-${n}`, generator.id];
+  }),
+);
 
 const EFFICIENCY_TIER_COUNT = 5;
-const GENERATOR_ALIAS_COUNT = 20;
 
 function buildEfficiencyAliases() {
   const aliases = {
@@ -38,9 +21,10 @@ function buildEfficiencyAliases() {
     overdrive: 'global-production-3',
   };
 
-  for (let n = 1; n <= GENERATOR_ALIAS_COUNT; n += 1) {
+  for (const generator of CLICKER_GENERATORS) {
+    const n = generator.id.replace(/^upgrade-/, '');
     for (let tier = 1; tier <= EFFICIENCY_TIER_COUNT; tier += 1) {
-      aliases[`generator-${n}-efficiency-${tier}`] = `upgrade-${n}-efficiency-${tier}`;
+      aliases[`generator-${n}-efficiency-${tier}`] = `${generator.id}-efficiency-${tier}`;
     }
   }
 
@@ -48,8 +32,8 @@ function buildEfficiencyAliases() {
     aliases[`cps-tap-${tier}`] = `click-per-second-tap-${tier}`;
   }
 
+  // Legacy Portuguese ids from an earlier product fork — keep for old saves.
   for (let n = 1; n <= 20; n += 1) {
-    // Legacy Portuguese ids from an earlier product fork.
     aliases[`geral-upgrade-${n}`] = `base-multiplier-${n}`;
   }
 
@@ -115,8 +99,13 @@ function dedupeUpgrades(upgrades) {
 
     const previous = byId.get(entry.id);
     const level = Math.max(
-      Number.isFinite(Number(previous?.level)) ? Number(previous.level) : 0,
-      Number.isFinite(Number(entry.level)) ? Number(entry.level) : 0,
+      0,
+      Math.floor(
+        Math.max(
+          Number.isFinite(Number(previous?.level)) ? Number(previous.level) : 0,
+          Number.isFinite(Number(entry.level)) ? Number(entry.level) : 0,
+        ),
+      ),
     );
     byId.set(entry.id, { id: entry.id, level });
   }

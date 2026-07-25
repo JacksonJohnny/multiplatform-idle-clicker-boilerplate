@@ -60,7 +60,7 @@ export function showOfflineReturn(scene, offline) {
     })
     .setOrigin(0.5);
   const awayText = scene.add
-    .text(width / 2, height / 2 - 68, `Away for ${formatOfflineDuration(offline.elapsedSeconds)}`, {
+    .text(width / 2, height / 2 - 68, UI_TEXT.offlineAwayFor.replace('{duration}', formatOfflineDuration(offline.elapsedSeconds)), {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '23px',
       color: COLORS.overlayText,
@@ -75,7 +75,7 @@ export function showOfflineReturn(scene, offline) {
     })
     .setOrigin(0.5);
   const earnings = scene.add
-    .text(width / 2, height / 2 + 34, `+${formatCoins(offline.gain)} coins`, {
+    .text(width / 2, height / 2 + 34, UI_TEXT.offlineGain.replace('{coins}', formatCoins(offline.gain)), {
       fontFamily: FONT_FAMILIES.display,
       fontSize: '30px',
       color: COLORS.positiveText,
@@ -296,6 +296,18 @@ export function showPrestigeConfirm(scene, onConfirm) {
     cancelLabel: UI_TEXT.prestigeConfirmNo,
     danger: true,
     confirmDelaySeconds: 5,
+    onConfirm,
+  });
+}
+
+export function showImportSaveConfirm(scene, onConfirm) {
+  showConfirmDialog(scene, {
+    title: UI_TEXT.importSaveConfirmTitle,
+    body: UI_TEXT.importSaveConfirmBody,
+    confirmLabel: UI_TEXT.importSaveConfirmYes,
+    cancelLabel: UI_TEXT.importSaveConfirmNo,
+    danger: true,
+    confirmDelaySeconds: 0,
     onConfirm,
   });
 }
