@@ -105,7 +105,7 @@ export class ClickerScene extends Phaser.Scene {
     this.coinsText = this.add
       .text(this.tapCenterX, UI_LAYOUT.coinsY, '', {
         fontFamily: FONT_FAMILIES.body,
-        fontSize: '36px',
+        fontSize: IS_MOBILE_UI ? '40px' : '44px',
         color: COLORS.whiteText,
         fontStyle: '800',
       })
@@ -114,8 +114,8 @@ export class ClickerScene extends Phaser.Scene {
     this.statsText = this.add
       .text(this.tapCenterX, UI_LAYOUT.statsY, '', {
         fontFamily: FONT_FAMILIES.body,
-        fontSize: '18px',
-        color: COLORS.statsText,
+        fontSize: IS_MOBILE_UI ? '15px' : '14px',
+        color: COLORS.mutedText,
       })
       .setOrigin(0.5);
 
@@ -191,7 +191,7 @@ export class ClickerScene extends Phaser.Scene {
           return;
         }
 
-        this.persist({ notify: true });
+        this.persist({ notify: false });
       },
     });
 
@@ -469,8 +469,8 @@ export class ClickerScene extends Phaser.Scene {
     );
     this.statsText.setText(
       UI_TEXT.hudStats
-        .replace('{perTap}', formatCoins(this.state.perClick))
-        .replace('{perSecond}', formatCoins(this.state.perSecond)),
+        .replace('{perSecond}', formatCoins(this.state.perSecond))
+        .replace('{perTap}', formatCoins(this.state.perClick)),
     );
     this.fitHudText(this.coinsText);
     this.fitHudText(this.statsText);

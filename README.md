@@ -108,7 +108,7 @@ Lock native mobile apps to **portrait**. Desktop / Steam stay landscape. Tighten
 
 ## Save
 
-Autosave every 10s + flush on hide / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
+Autosave every 10s (silent — toast only on save failure, export, or import) + flush on hide / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
 Offline: `hydrate` from `savedAt` on load (uncapped when `maxOfflineSeconds` is `null`); resume from background shows the welcome-back modal only when **gain > 0** and away **≥ 1s**.  
 Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js) — greenfield forks can leave the v1→10 chain alone and bump from 10.
 

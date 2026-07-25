@@ -69,10 +69,10 @@ export const COLORS = {
 const DESKTOP_LAYOUT = {
   navHeight: 0,
   leftRatio: 0.32,
-  storeRatio: 0.18,
+  storeRatio: 0.22,
   titleY: 72,
-  coinsY: 118,
-  statsY: 158,
+  coinsY: 122,
+  statsY: 168,
   tapCenterYRatio: 0.58,
   sectionTitleY: 78,
   panelTop: 160,

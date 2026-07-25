@@ -5,7 +5,8 @@ import { formatCoins } from '../lib/clickerMath.js';
 import { getAchievementListLines } from './achievementLines.js';
 import { createAscensionTokenBadge } from './ascensionTokenBadge.js';
 
-const LINE_HEIGHT = 28;
+const LINE_HEIGHT = 30;
+const SECTION_GAP = 18;
 
 function fill(template, values) {
   return Object.entries(values).reduce((text, [key, value]) => text.replace(`{${key}}`, String(value)), template);
@@ -21,17 +22,18 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
     .setOrigin(0, 0.5);
 
   const items = [];
+  let cursorY = listTop;
 
   function clearItems() {
     items.forEach((item) => {
       (item.nodes ?? [item.node]).forEach((node) => node.destroy());
     });
     items.length = 0;
+    cursorY = listTop;
   }
 
   function pushLine(text, style = {}) {
-    const index = items.length;
-    const y = listTop + index * LINE_HEIGHT;
+    const y = cursorY;
     const node = scene.add
       .text(listLeft, y, text, {
         fontFamily: FONT_FAMILIES.body,
@@ -42,11 +44,15 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
       .setOrigin(0, 0);
     content.add(node);
     items.push({ baseY: y, offsetY: 0, node, nodes: [node] });
+    cursorY += LINE_HEIGHT;
+  }
+
+  function pushSectionBreak() {
+    cursorY += SECTION_GAP;
   }
 
   function pushTokenMultLine(mult, count) {
-    const index = items.length;
-    const baseY = listTop + index * LINE_HEIGHT;
+    const baseY = cursorY;
     const midY = baseY + 8;
     const badge = createAscensionTokenBadge(scene, listLeft, midY, {
       size: 12,
@@ -61,6 +67,7 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
       .setOrigin(0, 0.5);
     content.add([...badge.nodes, node]);
     items.push({ baseY, offsetY: 8, node, nodes: [...badge.nodes, node] });
+    cursorY += LINE_HEIGHT;
   }
 
   return {
@@ -90,7 +97,7 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
       pushLine(fill(UI_TEXT.statusIdleRate, { rate: formatCoins(state.perSecond) }));
       pushLine(fill(UI_TEXT.statusPerTap, { rate: formatCoins(state.perClick) }));
       pushLine(fill(UI_TEXT.statusTotalTaps, { count: formatCoins(state.totalClicks) }));
-      pushLine('');
+      pushSectionBreak();
 
       pushLine(UI_TEXT.statusMultipliers, {
         fontFamily: FONT_FAMILIES.display,
@@ -101,7 +108,7 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
       pushLine(fill(UI_TEXT.statusAchievementMult, { mult: Number(achievementMult).toFixed(2) }));
       pushTokenMultLine(Number(tokenMult), tokenCount);
       pushLine(fill(UI_TEXT.statusCombinedMult, { mult: Number(combined).toFixed(2) }));
-      pushLine('');
+      pushSectionBreak();
 
       pushLine(`${UI_TEXT.statusAchievements} ${unlocked.size}/${ACHIEVEMENTS.length}`, {
         fontFamily: FONT_FAMILIES.display,
@@ -123,7 +130,7 @@ export function buildStatusView({ scene, content, listTop, listLeft = 28 }) {
         });
       });
 
-      return items.length * LINE_HEIGHT;
+      return Math.max(0, cursorY - listTop);
     },
   };
 }
