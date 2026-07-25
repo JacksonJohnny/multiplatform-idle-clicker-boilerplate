@@ -17,6 +17,8 @@ export default [
         localStorage: 'readonly',
         sessionStorage: 'readonly',
         navigator: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
         caches: 'readonly',
         indexedDB: 'readonly',
         Phaser: 'readonly',

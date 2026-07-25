@@ -1,7 +1,6 @@
 import { AUTO_TAP_INTERVAL_SECONDS } from '../data/upgrades.js';
 import { UI_TEXT } from '../config/uiText.js';
 import {
-  AUTO_TAP_CURSOR_ARC,
   AUTO_TAP_CURSOR_DISPLAY_H,
   AUTO_TAP_ORBIT_RADIUS,
   AUTO_TAP_RING_GAP,
