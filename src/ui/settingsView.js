@@ -65,28 +65,25 @@ export function buildSettingsView({ scene, container, layout, onToggle, onExport
     createToggle(scene, rowBox(layout, 0), UI_TEXT.sound, UI_TEXT.soundDescription, 'soundEnabled', onToggle),
   ];
   const actions = [
-    createActionRow(
-      scene,
-      rowBox(layout, 1),
-      UI_TEXT.exportSave,
-      UI_TEXT.exportSaveDescription,
-      'COPY',
-      () => onExportSave?.(),
+    createActionRow(scene, rowBox(layout, 1), UI_TEXT.exportSave, UI_TEXT.exportSaveDescription, 'COPY', () =>
+      onExportSave?.(),
     ),
-    createActionRow(
-      scene,
-      rowBox(layout, 2),
-      UI_TEXT.importSave,
-      UI_TEXT.importSaveDescription,
-      'PASTE',
-      () => onImportSave?.(),
+    createActionRow(scene, rowBox(layout, 2), UI_TEXT.importSave, UI_TEXT.importSaveDescription, 'PASTE', () =>
+      onImportSave?.(),
     ),
   ];
   container.add(
     items.flatMap((item) => [item.background, item.label, item.description, item.toggle, item.valueText, item.hitArea]),
   );
   container.add(
-    actions.flatMap((item) => [item.background, item.label, item.description, item.button, item.valueText, item.hitArea]),
+    actions.flatMap((item) => [
+      item.background,
+      item.label,
+      item.description,
+      item.button,
+      item.valueText,
+      item.hitArea,
+    ]),
   );
   return { title, items, actions };
 }

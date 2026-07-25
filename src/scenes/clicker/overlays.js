@@ -60,11 +60,16 @@ export function showOfflineReturn(scene, offline) {
     })
     .setOrigin(0.5);
   const awayText = scene.add
-    .text(width / 2, height / 2 - 68, UI_TEXT.offlineAwayFor.replace('{duration}', formatOfflineDuration(offline.elapsedSeconds)), {
-      fontFamily: FONT_FAMILIES.body,
-      fontSize: '23px',
-      color: COLORS.overlayText,
-    })
+    .text(
+      width / 2,
+      height / 2 - 68,
+      UI_TEXT.offlineAwayFor.replace('{duration}', formatOfflineDuration(offline.elapsedSeconds)),
+      {
+        fontFamily: FONT_FAMILIES.body,
+        fontSize: '23px',
+        color: COLORS.overlayText,
+      },
+    )
     .setOrigin(0.5);
   const earningsLabel = scene.add
     .text(width / 2, height / 2 - 12, UI_TEXT.offlineEarnings, {
