@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js';
 import { AUTO_TAP_INTERVAL_SECONDS } from '../data/upgrades.js';
 import { ACHIEVEMENTS, getAchievementIdleMultiplier } from '../data/achievements.js';
-import { calculateAscensionTokenGain, getAscensionTokenIdleMultiplier } from './prestige.js';
+import { calculateAscensionTokenGain, getAscensionTokenIdleMultiplier, asNonNegInt } from './prestige.js';
 import { BOOST_ID_ALIASES, UPGRADE_ID_ALIASES, normalizeSaveState } from './saveState.js';
 import {
   calculateBulkUpgradeCost,
@@ -142,12 +142,8 @@ function mergeStateFromSave(state, loaded) {
     normalized.coinsThisAscension !== undefined
       ? toDecimal(normalized.coinsThisAscension)
       : toDecimal(state.totalCoinsEarned);
-  state.ascensionTokens = Number.isFinite(Number(normalized.ascensionTokens))
-    ? Math.max(0, Number(normalized.ascensionTokens))
-    : state.ascensionTokens;
-  state.prestigeCount = Number.isFinite(Number(normalized.prestigeCount))
-    ? Math.max(0, Number(normalized.prestigeCount))
-    : state.prestigeCount;
+  state.ascensionTokens = asNonNegInt(normalized.ascensionTokens ?? state.ascensionTokens);
+  state.prestigeCount = asNonNegInt(normalized.prestigeCount ?? state.prestigeCount);
   state.unlockedAchievements = Array.isArray(normalized.unlockedAchievements)
     ? normalized.unlockedAchievements.filter((id) => typeof id === 'string')
     : state.unlockedAchievements;
@@ -308,8 +304,8 @@ function runPrestige(state) {
     return { ok: false, reason: 'no-tokens', tokensGained: 0 };
   }
 
-  state.ascensionTokens = (state.ascensionTokens | 0) + tokensGained;
-  state.prestigeCount = (state.prestigeCount | 0) + 1;
+  state.ascensionTokens = asNonNegInt(state.ascensionTokens) + tokensGained;
+  state.prestigeCount = asNonNegInt(state.prestigeCount) + 1;
   state.coins = new Decimal(0);
   state.coinsThisAscension = new Decimal(0);
   state.autoTapProgress = 0;
@@ -327,8 +323,8 @@ function serializeState(state) {
     totalCoinsEarned: toDecimal(state.totalCoinsEarned).toString(),
     coinsThisAscension: toDecimal(state.coinsThisAscension).toString(),
     totalClicks: state.totalClicks,
-    ascensionTokens: state.ascensionTokens | 0,
-    prestigeCount: state.prestigeCount | 0,
+    ascensionTokens: asNonNegInt(state.ascensionTokens),
+    prestigeCount: asNonNegInt(state.prestigeCount),
     unlockedAchievements: [...(state.unlockedAchievements ?? [])],
     autoTapProgress: state.autoTapProgress ?? 0,
     upgrades: state.upgrades.map((upgrade) => ({ id: upgrade.id, level: upgrade.level })),
@@ -390,16 +386,16 @@ export function createClickerController(upgrades, boosts = []) {
         achievementMultiplier: stats.achievementMultiplier,
         ascensionTokensMultiplier: stats.ascensionTokensMultiplier,
         productionMultiplier: stats.productionMultiplier,
-        ascensionTokens: state.ascensionTokens | 0,
+        ascensionTokens: asNonNegInt(state.ascensionTokens),
       };
     },
     getPrestigePreview() {
       return {
-        ascensionTokens: state.ascensionTokens | 0,
+        ascensionTokens: asNonNegInt(state.ascensionTokens),
         ascensionTokensGain: calculateAscensionTokenGain(state.coinsThisAscension),
-        ascensionTokensMultiplier: getAscensionTokenIdleMultiplier(state.ascensionTokens | 0),
+        ascensionTokensMultiplier: getAscensionTokenIdleMultiplier(state.ascensionTokens),
         achievementMultiplier: getAchievementIdleMultiplier(state.unlockedAchievements ?? []),
-        prestigeCount: state.prestigeCount | 0,
+        prestigeCount: asNonNegInt(state.prestigeCount),
       };
     },
     getUpgradeCost(upgradeId, buyAmount = 1) {

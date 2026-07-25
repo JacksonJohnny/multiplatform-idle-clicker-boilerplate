@@ -114,6 +114,26 @@ describe('clickerController', () => {
     expect(controller.state.coins.toString()).toBe('10');
   });
 
+  it('applies full offline duration with healed ascension token idle bonus', () => {
+    const controller = createController();
+    const nowMs = 2_000_000;
+    // Corrupted save from `| 0` wrap; must not zero the idle bonus during offline.
+    const offline = controller.hydrate(
+      {
+        coins: '0',
+        upgrades: [{ id: 'upgrade-1', level: 1 }],
+        ascensionTokens: -1_036_473_149,
+        savedAt: nowMs - 10_000,
+      },
+      { nowMs, maxOfflineSeconds: Number.POSITIVE_INFINITY },
+    );
+
+    expect(offline.elapsedSeconds).toBe(10);
+    expect(controller.state.ascensionTokens).toBe(3_258_494_147);
+    // Base generator is 1/s; token bonus must apply (not collapse via int32 wrap).
+    expect(offline.gain.gt(10)).toBe(true);
+  });
+
   it('runs auto tap clicks on an interval', () => {
     const controller = createController();
     controller.hydrate({

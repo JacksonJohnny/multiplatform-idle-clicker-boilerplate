@@ -169,15 +169,25 @@ export function normalizeSaveState(state) {
   next.boosts = dedupeBoosts(remapIds(next.boosts, BOOST_ID_ALIASES).filter((entry) => entry?.id));
 
   // Prestige currency rename: stars (v7) → ascensionTokens (v8+). Keep both paths safe.
-  const fromTokens = Number.isFinite(Number(next.ascensionTokens)) ? Math.max(0, Number(next.ascensionTokens)) : null;
-  const fromStars = Number.isFinite(Number(next.stars)) ? Math.max(0, Number(next.stars)) : null;
-  next.ascensionTokens = fromTokens ?? fromStars ?? 0;
+  // Do not use `| 0` — it wraps past 2^31 into negatives (int32).
+  const rawTokens = next.ascensionTokens !== undefined ? next.ascensionTokens : next.stars;
+  let tokens = Math.floor(Number(rawTokens));
+  if (!Number.isFinite(tokens)) {
+    tokens = 0;
+  } else if (tokens < 0) {
+    tokens = tokens >>> 0;
+  }
+  next.ascensionTokens = tokens;
   delete next.stars;
 
   if (next.prestigeCount === undefined || !Number.isFinite(Number(next.prestigeCount))) {
     next.prestigeCount = 0;
   } else {
-    next.prestigeCount = Math.max(0, Number(next.prestigeCount));
+    let count = Math.floor(Number(next.prestigeCount));
+    if (count < 0) {
+      count = count >>> 0;
+    }
+    next.prestigeCount = count;
   }
 
   if (!Array.isArray(next.unlockedAchievements)) {

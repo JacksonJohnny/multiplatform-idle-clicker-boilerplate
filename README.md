@@ -34,10 +34,10 @@ Fork guide: [`BOILERPLATE.md`](BOILERPLATE.md).
 - Decimal.js economy, exponential costs, Cookie Clicker–style formatting.
 - Tap + 20 chained generators + Auto Tap (orbiting cursors).
 - Meta-upgrades (UPGRADE), store buy amounts ×1 / ×10 / ×25 / MAX, progressive `???` unlocks.
-- Wall-clock idle + offline earnings (default uncapped).
+- Wall-clock idle + offline earnings (default uncapped; `maxOfflineSeconds: null`).
 - Achievements, prestige → Ascension Tokens (confirm + 5s countdown).
 - Versioned save (`SAVE_VERSION = 10`) with migrations + checksum.
-- **Desktop:** left TAP · middle UPGRADE / STATUS / PRESTIGE (default UPGRADE) · right STORE always on; row click to buy; hover tooltips.
+- **Desktop:** left TAP · middle UPGRADE / STATUS / PRESTIGE / settings (default UPGRADE) · right STORE always on; row click to buy; hover tooltips; ←/→ cycles middle tabs.
 - **Mobile:** bottom tabs (UPGRADE → STORE → TAP → STATUS → PRESTIGE) + settings gear; swipe / ← →.
 
 ## Folder map
@@ -61,7 +61,7 @@ capacitor.config.json
 | Concept | Code / UI | Persistence |
 | --- | --- | --- |
 | Meta-upgrades | `META_UPGRADES`, `meta*` | Save field **`boosts`** — do not rename without a migration |
-| Ascension Tokens | `ascensionTokens` | `ascensionTokens` |
+| Ascension Tokens | `ascensionTokens` | `ascensionTokens` — use `asNonNegInt` in [`prestige.js`](src/lib/prestige.js); **never** `| 0` (signed int32 wraps past ~2.1B) |
 | Yellow ★ on STORE | Efficiency pips | Derived from efficiency entries in `boosts` |
 
 Rename UI freely; keep `boosts` stable.
@@ -106,7 +106,8 @@ Lock native mobile apps to **portrait**. Desktop / Steam stay landscape.
 
 ## Save
 
-Autosave every 10s + flush on blur / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
+Autosave every 10s + flush on hide / `pagehide` / `beforeunload`. Reset: `?resetSave=1`.  
+Offline: `hydrate` from `savedAt` on load (uncapped when `maxOfflineSeconds` is `null`); resume from background shows the welcome-back modal if away ≥ 1s.  
 Migrations: [`src/services/saveMigrations.js`](src/services/saveMigrations.js).
 
 ## Customize
