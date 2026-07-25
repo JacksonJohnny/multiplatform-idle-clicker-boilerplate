@@ -56,10 +56,8 @@ export function updateStoreListLayout(scene) {
 }
 
 export function updateMetaListLayout(scene) {
-  const { rowHeight, rowGap, listTop } = scene.metaLayout;
+  const { rowHeight, rowGap, listTop, panelCenterX, panelCenterY, visibleListHeight } = scene.metaLayout;
   const step = rowHeight + rowGap;
-  const visibleMeta = scene.state.boosts.filter((meta) => isMetaUpgradeUnlocked(scene.state, meta));
-  scene.metaEmptyText.setVisible(scene.activePage === PAGE.UPGRADE && visibleMeta.length === 0);
 
   const availableRows = [];
 
@@ -98,6 +96,17 @@ export function updateMetaListLayout(scene) {
   const visibleCount = availableRows.length;
   const listHeight = visibleCount > 0 ? visibleCount * rowHeight + (visibleCount - 1) * rowGap : 0;
   scene.metaScroll.updateMetrics(listHeight);
+
+  // Hint fills the empty band when few unlocks are showing.
+  const showHint = scene.activePage === PAGE.UPGRADE && visibleCount < 3;
+  scene.metaEmptyText.setVisible(showHint);
+  if (showHint) {
+    const hintY =
+      visibleCount === 0
+        ? panelCenterY
+        : Math.min(listTop + listHeight + 36, listTop + visibleListHeight - 28);
+    scene.metaEmptyText.setPosition(panelCenterX, hintY);
+  }
 }
 
 export function renderStoreRows(scene) {
@@ -121,10 +130,10 @@ export function renderStoreRows(scene) {
     const canBuy = preview?.canBuy === true;
     let effectLabel =
       upgrade.type === 'click'
-        ? UI_TEXT.tapPowerEffect.replace('{value}', String(upgrade.baseValue))
+        ? UI_TEXT.tapPowerEffect.replace('{value}', formatCoins(upgrade.baseValue))
         : upgrade.type === 'auto_tap'
           ? getAutoTapEffectLabel(upgrade)
-          : UI_TEXT.generatorEffect.replace('{value}', String(upgrade.baseValue));
+          : UI_TEXT.generatorEffect.replace('{value}', formatCoins(upgrade.baseValue));
 
     if (upgrade.type === 'auto') {
       const shareLabel = formatIdleSharePercent(getGeneratorIdleShare(scene.state, upgrade.id));
@@ -144,16 +153,19 @@ export function renderStoreRows(scene) {
     item.info.setText(effectLabel);
     item.cost?.setText(formatCoins(cost))?.setColor(COLORS.whiteText)?.setVisible(item.rowBg.visible);
 
+    const costWidth = item.cost?.visible ? item.cost.width : 0;
+    const infoRight = (item.cost?.x ?? item.label.x) - costWidth - 12;
+    item.info.setWordWrapWidth(Math.max(64, infoRight - item.info.x), true);
+
     const starCount = getGeneratorEfficiencyPipCount(scene.state, upgrade.id);
     const starStartX = item.label.x + item.label.width + 10;
+    const levelLeft = item.level ? item.level.x - item.level.width - 8 : Number.POSITIVE_INFINITY;
     item.efficiencyPips?.forEach((pip, index) => {
-      const show = index < starCount && item.rowBg.visible;
+      const x = starStartX + index * 17;
+      const show = index < starCount && item.rowBg.visible && x + 14 <= levelLeft;
       pip.setVisible(show);
       if (show) {
-        pip.x = starStartX + index * 17;
-        if (item.level && pip.x + 14 > item.level.x - item.level.width - 8) {
-          pip.x = Math.max(starStartX, item.level.x - item.level.width - 8 - (starCount - 1 - index) * 17);
-        }
+        pip.x = x;
       }
     });
   });

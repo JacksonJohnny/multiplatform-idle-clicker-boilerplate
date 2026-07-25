@@ -4,8 +4,8 @@ import { getAchievementIdleMultiplier } from '../data/achievements.js';
 import { getAscensionTokenIdleMultiplier } from './prestige.js';
 import { getAutoTapCursorTier, getMaxAutoTapPowerSlots } from './autoTapProgress.js';
 
-const SCALE_FROM_MILLION = [
-  '',
+const SCALE_LONG = [
+  ' thousand',
   ' million',
   ' billion',
   ' trillion',
@@ -72,24 +72,22 @@ export function formatCoins(value, options = {}) {
   const sign = amount.isNeg() ? '-' : '';
   const abs = amount.abs();
 
+  // Cookie Clicker Beautify: every third power, coefficient rounded to 3 decimals (max 6 digits).
   if (abs.gte(1_000_000)) {
     let scaled = abs.div(1000);
     let base = 0;
 
     while (scaled.round().gte(1000)) {
-      if (base >= SCALE_FROM_MILLION.length - 1) {
+      if (base >= SCALE_LONG.length - 1) {
         return `${sign}${abs.toExponential(2).replace('e+', 'e')}`;
       }
-
       scaled = scaled.div(1000);
       base += 1;
     }
 
-    const scaleDivisor = Decimal.pow(1000, base + 1);
-    const scaledRate = rateAmount && rateAmount.isFinite() ? rateAmount.abs().div(scaleDivisor) : null;
-    const decimals = scaledRate ? decimalsForRate(scaledRate, 3) : 3;
-
-    return `${sign}${formatScaleCoefficient(scaled, decimals)}${SCALE_FROM_MILLION[base]}`;
+    // Math.round(val * 1000) / 1000
+    const rounded = scaled.times(1000).round().div(1000);
+    return `${sign}${formatScaleCoefficient(rounded, 3)}${SCALE_LONG[base]}`;
   }
 
   const decimals = rateAmount && rateAmount.isFinite() ? decimalsForRate(rateAmount.abs(), floats) : floats;

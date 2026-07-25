@@ -65,15 +65,15 @@ function createFullHeightListLayout(
 
 export function createStorePage(scene) {
   const compactRows = IS_MOBILE_UI ? scene.state.upgrades.length > 4 : true;
-  const rowHeight = IS_MOBILE_UI ? Math.max(compactRows ? 72 : 84, 72) : 56;
-  const rowGap = IS_MOBILE_UI ? (compactRows ? 12 : 16) : 6;
+  const rowHeight = IS_MOBILE_UI ? Math.max(compactRows ? 72 : 84, 72) : 68;
+  const rowGap = IS_MOBILE_UI ? (compactRows ? 12 : 16) : 14;
   const layout = createFullHeightListLayout(scene, {
     rowHeight,
     rowGap,
-    panelPadding: IS_MOBILE_UI ? 12 : 8,
+    panelPadding: IS_MOBILE_UI ? 12 : 10,
     column: 'right',
   });
-  scene.upgradeLayout = { ...layout, compactRows };
+  scene.upgradeLayout = { ...layout, compactRows, textOffsetRatio: IS_MOBILE_UI ? 0.22 : 0.28 };
 
   scene.storeTitle = scene.add
     .text(layout.titleX, UI_LAYOUT.sectionTitleY, UI_TEXT.storeTitle, {
@@ -133,10 +133,12 @@ export function createMetaUpgradePage(scene) {
     .setStrokeStyle(2, COLORS.storePanelBorder);
 
   scene.metaEmptyText = scene.add
-    .text(layout.panelCenterX, layout.panelCenterY, UI_TEXT.unlockHint, {
+    .text(layout.panelCenterX, layout.panelCenterY, UI_TEXT.upgradesEmpty, {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '20px',
       color: COLORS.mutedText,
+      align: 'center',
+      wordWrap: { width: layout.listWidth - 24 },
     })
     .setOrigin(0.5)
     .setVisible(false);

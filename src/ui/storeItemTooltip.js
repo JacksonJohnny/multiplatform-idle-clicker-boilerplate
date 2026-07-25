@@ -14,9 +14,12 @@ import {
   secondsUntilAffordable,
 } from '../lib/clickerMath.js';
 
-const LINE_GAP = 4;
+const LINE_GAP = 5;
+const SECTION_GAP = 14;
 const FONT_SIZE = '15px';
-const LINE_HEIGHT = 19;
+const SECTION_FONT_SIZE = '12px';
+const LINE_HEIGHT = 20;
+const SECTION_LINE_HEIGHT = 16;
 
 function emph(text) {
   return { text: String(text), emph: true };
@@ -26,39 +29,49 @@ function plain(text) {
   return { text: String(text), emph: false };
 }
 
+function section(text) {
+  return { text: String(text), section: true };
+}
+
+function blank() {
+  return [];
+}
+
+function sectionHeader(title) {
+  return [section(title)];
+}
+
 export function buildStoreItemTooltipLines(state, upgrade, { cost, amount = 1 } = {}) {
   const lines = [];
-  lines.push([plain(upgrade.label)]);
+  lines.push([emph(upgrade.label)]);
+  lines.push(blank());
+  lines.push(sectionHeader(UI_TEXT.tooltipSectionInfo));
   lines.push([plain(UI_TEXT.tooltipOwnedLabel), emph(upgrade.level)]);
   if (cost != null) {
     lines.push([plain(UI_TEXT.tooltipCostLabel), emph(formatCoins(cost))]);
   }
-  lines.push([]);
 
   if (upgrade.type === 'auto') {
     const { productionMultiplier } = calculateStats(state);
     const each = getGeneratorAutoRate(state, { ...upgrade, level: 1 }).times(productionMultiplier);
-    const eachLabel = formatCoins(each);
-    lines.push([plain(UI_TEXT.tooltipProducesPrefix), emph(eachLabel), plain(UI_TEXT.tooltipProducesSuffix)]);
-    lines.push([]);
-    lines.push([plain(UI_TEXT.tooltipEachPrefix), emph(eachLabel), plain(UI_TEXT.tooltipEachSuffix)]);
+    lines.push(blank());
+    lines.push(sectionHeader(UI_TEXT.tooltipSectionProduction));
+    lines.push([plain(UI_TEXT.tooltipEachPrefix), emph(formatCoins(each)), plain(UI_TEXT.tooltipEachSuffix)]);
     if (upgrade.level > 0) {
       const total = getGeneratorAutoRate(state, upgrade).times(productionMultiplier);
+      lines.push([plain(UI_TEXT.tooltipTotalPrefix), emph(formatCoins(total)), plain(UI_TEXT.tooltipTotalSuffix)]);
       const share = formatIdleSharePercent(getGeneratorIdleShare(state, upgrade.id));
-      const row = [
-        emph(upgrade.level),
-        plain(UI_TEXT.tooltipTotalMid),
-        emph(formatCoins(total)),
-        plain(UI_TEXT.tooltipTotalSuffix),
-      ];
       if (share) {
-        row.push(plain(' '), emph(`(${share})`));
+        lines.push([plain(UI_TEXT.tooltipSharePrefix), emph(share)]);
       }
-      lines.push(row);
     }
   } else if (upgrade.type === 'click') {
+    lines.push(blank());
+    lines.push(sectionHeader(UI_TEXT.tooltipSectionProduction));
     lines.push([plain(UI_TEXT.tooltipTapPrefix), emph(upgrade.baseValue), plain(UI_TEXT.tooltipTapSuffix)]);
   } else if (upgrade.type === 'auto_tap') {
+    lines.push(blank());
+    lines.push(sectionHeader(UI_TEXT.tooltipSectionProduction));
     lines.push([
       plain(UI_TEXT.tooltipAutoTapBefore),
       emph(AUTO_TAP_INTERVAL_SECONDS),
@@ -69,7 +82,8 @@ export function buildStoreItemTooltipLines(state, upgrade, { cost, amount = 1 } 
   }
 
   if (cost != null) {
-    lines.push([]);
+    lines.push(blank());
+    lines.push(sectionHeader(UI_TEXT.tooltipSectionBuy));
     const wait = secondsUntilAffordable(cost, state.coins, state.perSecond);
     if (wait === 0) {
       lines.push([emph(UI_TEXT.tooltipAffordableNow)]);
@@ -82,7 +96,7 @@ export function buildStoreItemTooltipLines(state, upgrade, { cost, amount = 1 } 
     const rateGain = estimateGeneratorRateGain(state, upgrade, amount);
     const payback = paybackSeconds(cost, rateGain);
     if (payback != null) {
-      lines.push([plain(UI_TEXT.tooltipPayback), emph(formatEta(payback))]);
+      lines.push([plain(UI_TEXT.tooltipPaybackLabel), emph(formatEta(payback))]);
     }
   }
 
@@ -96,8 +110,8 @@ export function buildStoreItemTooltipBody(state, upgrade, options) {
 }
 
 export function createStoreItemTooltip(scene) {
-  const pad = 14;
-  const maxWidth = 340;
+  const pad = 16;
+  const maxWidth = 360;
   const bg = scene.add
     .rectangle(0, 0, 200, 100, COLORS.overlayPanel, 0.96)
     .setStrokeStyle(2, COLORS.accent)
@@ -142,9 +156,11 @@ export function createStoreItemTooltip(scene) {
 
     lines.forEach((line) => {
       if (!line.length) {
-        y += LINE_HEIGHT / 2;
+        y += SECTION_GAP;
         return;
       }
+
+      const isSection = line.length === 1 && line[0].section;
       let x = 0;
       line.forEach((part) => {
         const node = scene.make.text({
@@ -154,9 +170,9 @@ export function createStoreItemTooltip(scene) {
           add: false,
           style: {
             fontFamily: FONT_FAMILIES.body,
-            fontSize: FONT_SIZE,
-            color: part.emph ? COLORS.whiteText : COLORS.overlayText,
-            fontStyle: part.emph ? '800' : 'normal',
+            fontSize: isSection ? SECTION_FONT_SIZE : FONT_SIZE,
+            color: part.section ? COLORS.mutedText : part.emph ? COLORS.whiteText : COLORS.overlayText,
+            fontStyle: part.section ? '800' : part.emph ? '800' : 'normal',
           },
         });
         owned.add(node);
@@ -164,7 +180,7 @@ export function createStoreItemTooltip(scene) {
         x += node.width;
       });
       maxW = Math.max(maxW, x);
-      y += LINE_HEIGHT + LINE_GAP;
+      y += (isSection ? SECTION_LINE_HEIGHT : LINE_HEIGHT) + LINE_GAP;
     });
 
     return { width: maxW, height: Math.max(LINE_HEIGHT, y - LINE_GAP) };
@@ -188,7 +204,7 @@ export function createStoreItemTooltip(scene) {
     const { width: contentW, height: contentH } = renderLines(
       buildStoreItemTooltipLines(scene.state, live, { cost: preview?.cost, amount: preview?.amount ?? 1 }),
     );
-    const width = Math.min(maxWidth, Math.max(180, contentW + pad * 2));
+    const width = Math.min(maxWidth, Math.max(200, contentW + pad * 2));
     const height = contentH + pad * 2;
     bg.setSize(width, height);
     const x = scene.uiColumns.rightLeft - 10;

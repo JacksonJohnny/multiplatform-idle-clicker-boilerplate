@@ -3,17 +3,18 @@ const AXIS_LOCK_PX = 12;
 
 function defaultSyncItem(item, y, layout) {
   const { rowHeight } = layout;
+  const o = layout.textOffsetRatio ?? 0.22;
   item.rowBg.y = y;
-  item.label.y = y - rowHeight * 0.22;
+  item.label.y = y - rowHeight * o;
   if (item.level) {
-    item.level.y = y - rowHeight * 0.22;
+    item.level.y = y - rowHeight * o;
   }
-  item.info.y = y + rowHeight * 0.22;
+  item.info.y = y + rowHeight * o;
   if (item.cost) {
-    item.cost.y = y + rowHeight * 0.22;
+    item.cost.y = y + rowHeight * o;
   }
   item.efficiencyPips?.forEach((pip) => {
-    pip.y = y - rowHeight * 0.22;
+    pip.y = y - rowHeight * o;
   });
   if (item.buyButton) {
     item.buyButton.y = y;

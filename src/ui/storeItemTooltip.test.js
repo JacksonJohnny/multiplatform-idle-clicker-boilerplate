@@ -12,13 +12,17 @@ describe('store item tooltip', () => {
     ascensionTokens: 0,
   };
 
-  it('includes owned count and generator rates', () => {
+  it('groups content into INFO / PRODUCTION / BUY sections', () => {
     const body = buildStoreItemTooltipBody(state, state.upgrades[0], { cost: new Decimal(100) });
     expect(body).toContain('Generator 1');
-    expect(body).toContain('owned: 2');
-    expect(body).toContain('cost');
-    expect(body).toContain('each produces');
-    expect(body).toContain('2 producing');
+    expect(body).toContain('INFO');
+    expect(body).toContain('Owned  2');
+    expect(body).toContain('Cost  ');
+    expect(body).toContain('PRODUCTION');
+    expect(body).toContain('Each  ');
+    expect(body).toContain('Total  ');
+    expect(body).toContain('BUY');
+    expect(body).not.toContain('Produces ');
   });
 
   it('marks numeric values for emphasis', () => {
@@ -26,6 +30,7 @@ describe('store item tooltip', () => {
     const flat = lines.flat();
     expect(flat.some((part) => part.emph && part.text === '2')).toBe(true);
     expect(flat.some((part) => part.emph && part.text.includes('100'))).toBe(true);
+    expect(flat.some((part) => part.section && part.text === 'PRODUCTION')).toBe(true);
   });
 
   it('shows affordable ETA and payback for generators', () => {

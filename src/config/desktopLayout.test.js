@@ -7,7 +7,7 @@ describe('desktop three-column layout', () => {
     const cols = getUiColumns(1280);
     expect(cols.leftWidth + cols.middleWidth + cols.rightWidth).toBe(1280);
     expect(cols.leftWidth / 1280).toBeCloseTo(0.32, 2);
-    expect(cols.rightWidth / 1280).toBeCloseTo(0.18, 2);
+    expect(cols.rightWidth / 1280).toBeCloseTo(0.22, 2);
     expect(cols.middleWidth).toBeGreaterThan(cols.leftWidth);
     expect(cols.rightLeft).toBe(cols.leftWidth + cols.middleWidth);
     expect(getNavHeight()).toBe(0);

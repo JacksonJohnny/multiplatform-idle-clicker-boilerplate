@@ -7,14 +7,17 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
   const step = rowHeight + rowGap;
   const startY = listTop + rowHeight / 2;
   const desktopStore = !IS_MOBILE_UI;
-  const labelFontSize = desktopStore ? '14px' : compactRows ? '20px' : '24px';
-  const infoFontSize = desktopStore ? '11px' : compactRows ? '15px' : '17px';
-  const costFontSize = desktopStore ? '12px' : compactRows ? '16px' : '18px';
+  const labelFontSize = desktopStore ? '15px' : compactRows ? '20px' : '24px';
+  const infoFontSize = desktopStore ? '13px' : compactRows ? '15px' : '17px';
+  const costFontSize = desktopStore ? '13px' : compactRows ? '16px' : '18px';
   const rowCenterX = listLeft + listWidth / 2;
   const levelX = listLeft + listWidth - 8;
   const labelX = listLeft + 14;
-  const infoMaxWidth = Math.max(80, listWidth * 0.55);
+  const costRail = desktopStore ? Math.min(150, Math.floor(listWidth * 0.42)) : Math.floor(listWidth * 0.4);
+  const infoMaxWidth = Math.max(72, listWidth - costRail - 20);
   const starFontSize = desktopStore ? '11px' : compactRows ? '14px' : '15px';
+  const topY = desktopStore ? 0.28 : 0.22;
+  const botY = desktopStore ? 0.28 : 0.22;
 
   return upgrades.map((upgrade, index) => {
     const y = startY + index * step;
@@ -23,7 +26,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       .setStrokeStyle(2, COLORS.upgradeRowBorder)
       .setInteractive({ useHandCursor: true });
     const label = scene.add
-      .text(labelX, y - rowHeight * 0.22, '', {
+      .text(labelX, y - rowHeight * topY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: labelFontSize,
         color: COLORS.upgradeText,
@@ -31,7 +34,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       })
       .setOrigin(0, 0.5);
     const level = scene.add
-      .text(levelX, y - rowHeight * 0.22, '', {
+      .text(levelX, y - rowHeight * topY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: labelFontSize,
         color: COLORS.upgradeText,
@@ -41,7 +44,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
     // Efficiency ★ pips (not prestige / Ascension Tokens).
     const efficiencyPips = Array.from({ length: GENERATOR_EFFICIENCY_STAR_MAX }, () =>
       scene.add
-        .text(0, y - rowHeight * 0.22, '★', {
+        .text(0, y - rowHeight * topY, '★', {
           fontFamily: 'Arial, "Segoe UI Symbol", sans-serif',
           fontSize: starFontSize,
           color: COLORS.efficiencyPip,
@@ -50,7 +53,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
         .setVisible(false),
     );
     const info = scene.add
-      .text(labelX, y + rowHeight * 0.22, '', {
+      .text(labelX, y + rowHeight * botY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: infoFontSize,
         color: COLORS.upgradeInfo,
@@ -58,7 +61,7 @@ export function buildUpgradeListView({ scene, container, upgrades, layout, onBuy
       })
       .setOrigin(0, 0.5);
     const cost = scene.add
-      .text(levelX, y + rowHeight * 0.22, '', {
+      .text(levelX, y + rowHeight * botY, '', {
         fontFamily: FONT_FAMILIES.body,
         fontSize: costFontSize,
         color: COLORS.whiteText,

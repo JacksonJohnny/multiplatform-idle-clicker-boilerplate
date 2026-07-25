@@ -11,8 +11,8 @@ export function buildPrestigeView({ scene, container, layout, onRequestPrestige 
   const originX = layout?.listLeft ?? bandLeft + 28;
   const contentWidth = layout?.listWidth ?? bandWidth - 56;
   const centerX = originX + contentWidth / 2;
-  const tokenY = (layout?.listTop ?? (IS_MOBILE_UI ? 310 : 120)) + 16;
-  const summaryY = tokenY + 50;
+  const tokenY = (layout?.listTop ?? (IS_MOBILE_UI ? 310 : 120)) + 20;
+  const summaryY = tokenY + 64;
   const title = scene.add
     .text(layout?.titleX ?? originX, UI_LAYOUT.sectionTitleY, UI_TEXT.prestigeTitle, {
       fontFamily: FONT_FAMILIES.display,
@@ -43,13 +43,23 @@ export function buildPrestigeView({ scene, container, layout, onRequestPrestige 
       fontFamily: FONT_FAMILIES.body,
       fontSize: '18px',
       color: COLORS.text,
-      lineSpacing: 10,
+      lineSpacing: 14,
+    })
+    .setOrigin(0, 0);
+
+  const callout = scene.add
+    .text(originX, summaryY + 110, '', {
+      fontFamily: FONT_FAMILIES.body,
+      fontSize: '18px',
+      color: COLORS.accentText,
+      fontStyle: '800',
+      wordWrap: { width: contentWidth },
     })
     .setOrigin(0, 0);
 
   const buttonY = scene.navTop - 48;
   const hint = scene.add
-    .text(originX, buttonY - 72, UI_TEXT.prestigeHint, {
+    .text(originX, buttonY - 84, UI_TEXT.prestigeHint, {
       fontFamily: FONT_FAMILIES.body,
       fontSize: '15px',
       color: COLORS.mutedText,
@@ -71,13 +81,14 @@ export function buildPrestigeView({ scene, container, layout, onRequestPrestige 
 
   button.on('pointerup', () => onRequestPrestige());
 
-  container.add([...tokenBadge.nodes, tokenCount, summary, hint, button, buttonText]);
+  container.add([...tokenBadge.nodes, tokenCount, summary, callout, hint, button, buttonText]);
 
   return {
     title,
     tokenBadge,
     tokenCount,
     summary,
+    callout,
     hint,
     button,
     buttonText,
@@ -90,10 +101,10 @@ export function buildPrestigeView({ scene, container, layout, onRequestPrestige 
           UI_TEXT.prestigeIdleBonus.replace('{pct}', ((preview.ascensionTokensMultiplier - 1) * 100).toFixed(0)),
           UI_TEXT.prestigeCountLabel.replace('{count}', String(preview.prestigeCount)),
           UI_TEXT.prestigeCoinsThisRun.replace('{coins}', formatCoins(state.coinsThisAscension)),
-          '',
-          gain > 0 ? UI_TEXT.prestigeNowFor.replace('{count}', String(gain)) : UI_TEXT.prestigeEarnMore,
         ].join('\n'),
       );
+      callout.setText(gain > 0 ? UI_TEXT.prestigeNowFor.replace('{count}', String(gain)) : UI_TEXT.prestigeEarnMore);
+      callout.setColor(gain > 0 ? COLORS.accentText : COLORS.mutedText);
       const canPrestige = gain > 0;
       button.setFillStyle(canPrestige ? COLORS.primary : COLORS.disabled);
       button.setStrokeStyle(2, canPrestige ? COLORS.primaryBorder : COLORS.disabledBorder);

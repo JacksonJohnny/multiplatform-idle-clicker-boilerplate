@@ -24,13 +24,16 @@ describe('clickerMath', () => {
     expect(formatCoins(705_026)).toBe('705,026');
     expect(formatCoins(1_014_000_000)).toBe('1.014 billion');
     expect(formatCoins(1_000_000)).toBe('1 million');
+    expect(formatCoins(152_661_000_000)).toBe('152.661 billion');
+    expect(formatCoins(4_652_000_000_000)).toBe('4.652 trillion');
     expect(formatCoins('1e33')).toBe('1 decillion');
     expect(formatCoins('1e40')).toMatch(/e40$/);
   });
 
-  it('drops scaled decimals when income already ticks the unit fast', () => {
-    expect(formatCoins(388_557_000, { rate: 500_000 })).toBe('389 million');
-    expect(formatCoins(388_557_000, { rate: 100 })).toBe('388.557 million');
+  it('caps large coefficients at 3 decimals (max 6 digits)', () => {
+    expect(formatCoins(152_661_000_000)).toBe('152.661 billion');
+    expect(formatCoins(388_557_000)).toBe('388.557 million');
+    expect(formatCoins(999_499_000_000)).toBe('999.499 billion');
   });
 
   it('computes geometric upgrade costs', () => {
